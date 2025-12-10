@@ -1,0 +1,21 @@
+{
+  "name": "bps-operations",
+  "version": "1.0.0",
+  "description": "IDOP - Bicodo Postal Services is a logistics drop-off point handling transactions for platforms like Shopee and Lazada. While their parcel throughput is high, their internal administrative processes are currently disjointed and manual.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
