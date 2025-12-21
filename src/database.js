@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3');
-const DB_SOURCE = 'crud.db';
+const bcrypt = require('bcryptjs');
+const DB_SOURCE = "bps.db";
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
     if(err) {
@@ -208,6 +209,30 @@ const initDB = () => {
                 console.log(`audit_logs TABLE CREATED SUCCESSFULLY/ALREADY EXISTS.`)
             }
         })
+
+
+        // Add initial admin account
+        // Pang CREATE din ng account to
+        async function seedAdmin() {
+            const password = "Admin123!";
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(password, salt);
+
+            db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'Admin')`);
+            db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'Staff')`);
+
+            db.run(`
+                INSERT OR IGNORE INTO users (username, email, password_hash, role_id, is_active)
+                VALUES ('admin', 'admin@bps.com', ?, 1, 1)
+            `, [hash], (err) => {
+                if(err) {
+                    console.error(err.message);
+                } else {
+                    console.log("Admin account created! Username admin, Password: " + password);
+                }
+            })
+        }
+        seedAdmin();
     })
 }
 
