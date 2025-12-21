@@ -1,5 +1,6 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const logAudit = require('../utils/audit-logger')
 const { all, get, run } = require('../utils/db-async');
 
 const login = async (req, res) => {
@@ -64,4 +65,89 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = { login }
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await all(`
+            SELECT * FROM users    
+        `)
+
+        res.status(200).json({success:true,data:users})
+    } catch(err) {
+        res.status(500).json({success:false,data:`Internal Server Error: ${err.message}`})
+    }
+}
+
+const createUser = async (req, res) => {
+    try {
+        const { username, email, password, role_id } = req.body;
+
+        if(!username || !email || !password || !role_id) {
+            return res.status(400).json({success:false,data:"All fields are required."})
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        const result = await run(`
+            INSERT INTO users (username, email, password_hash, role_id, is_active)
+            VALUES (?, ?, ?, ?, 1)
+        `, [username, email, hash, role_id])
+
+        await logAudit(req.user.id, 'CREATE', 'users', result.lastID, `Created user ${username}`, req.ip);
+
+        res.status(201).json({success:true,data:"User created successfully", id: result.lastID})
+    } catch(err) {
+        return res.status(500).json({success:false,data:err.message})
+    }
+}
+
+const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        let { username, password, email, role_id, is_active } = req.body;
+
+        if(!password) {
+            password = null;
+        } else {
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
+        }
+
+        await run(`
+            UPDATE users
+            SET
+                username = COALESCE(?, username),
+                password_hash = COALESCE(?, password_hash),
+                email = COALESCE(?, email),
+                role_id = COALESCE(?, role_id),
+                is_active = COALESCE(?, is_active)
+        `, [username, password, email, role_id, is_active])
+
+        await logAudit(req.user.id, 'UPDATE', 'users', id, `Updated profile for user ID:${id}`, req.ip);
+
+        return res.status(200).json({success:true,data:"User updated successfully!"})
+    } catch(err) {
+        return res.status(500).json({success:false,data:err.message})
+    }
+}
+
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await run(`
+            UPDATE users
+            SET
+                is_active = 0
+            WHERE id = ?    
+        `, [id])
+
+        await logAudit(req.user.id, 'UPDATE', 'users', id, `Disabled user ID: ${id}`, req.ip);
+
+        return res.status(200).json({success:true,data:"User deleted successfully!"})
+    } catch(err) {
+        return res.status(500).json({success:false,data:`Internal Server Error: ${err.message}`})
+    }
+}
+
+module.exports = { login, getAllUsers, createUser, updateUser, deleteUser }
