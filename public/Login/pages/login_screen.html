@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>BPS Operation Management System Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/login.css">
+    <script src="../js/auth.js"></script>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <div class="sidebar">
+            <div class="sidebar-content">
+                <h1 class="sidebar-title">
+                    BPS OPERATION <br />
+                    MANAGEMENT <br />
+                    SYSTEM
+                </h1>
+                <p class="sidebar-description">
+                    Log in to access the BPS system, built for security and accountability.
+                </p>
+            </div>
+        </div>
+        <div class="form-section">
+            <div class="form-content">
+                <div class="logo-container">
+                    <img src="../Logo/Bicodo Postal Services Logo.png" alt="Bicodo Postal Services Logo"
+                        class="logo-image">
+                </div>
+                <div>
+                    <h2 class="header-title">Welcome Back!</h2>
+                </div>
+                <form action="#" id="loginForm" class="login-form" method="POST">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <span class="material-icons-outlined">mail</span>
+                            </div>
+                            <input class="input-field" id="email" name="email" placeholder="Enter your email"
+                                type="email" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <span class="material-icons-outlined">lock</span>
+                            </div>
+                            <input class="input-field" id="password" name="password" placeholder="Enter your password"
+                                type="password" required style="padding-right: 2.5rem;" />
+                            <span id="toggle-password" class="material-icons-outlined password-toggle"
+                                onclick="Auth.togglePasswordVisibility('password', 'toggle-password')">visibility</span>
+                        </div>
+                        <div class="forgot-password-link">
+                            <a class="link-text" href="forgot_password_screen.html">
+                                Forgot password?
+                            </a>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn-primary" type="submit">
+                            Log in
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="footer">
+                © 2023 Bicodo Postal Services. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is already logged in
+            if (Auth.isAuthenticated()) {
+                console.log('User is already authenticated.');
+                // Redirect to dashboard if already authenticated
+                window.location.href = '../../Dashboard/pages/dashboard.html';
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                console.log('Attempting login for:', email);
+
+                try {
+                    const result = await Auth.login(email, password);
+
+                    if (result.success) {
+                        alert('Login Successful!');
+                        // Redirect to dashboard
+                        window.location.href = '../../Management_System/pages/dashboard.html';
+                    } else {
+                        alert('Login Failed: ' + (result.data || result.message || 'Invalid credentials'));
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('An error occurred during login. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

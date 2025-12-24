@@ -6,12 +6,13 @@ const { db, initDB } = require('./database');
 // Routes
 const authRoutes = require('./routes/authRoutes');
 
+const path = require('path');
 const app = express();
 const PORT = process.env.port || 3000;
 
 // Middlewares
 app.use(express.json());
-app.use(express.static('../public'));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(cors());
 
 // Initialize Database

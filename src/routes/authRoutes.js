@@ -7,6 +7,7 @@ router.post('/login', authController.login);
 router.get('/', verifyToken, isAdmin, authController.getAllUsers);
 router.post('/', verifyToken, isAdmin, authController.createUser);
 router.put('/:id', verifyToken, isAdmin, authController.updateUser);
+router.put('/status/:id', verifyToken, isAdmin, authController.toggleUserStatus);
 router.delete('/:id', verifyToken, isAdmin, authController.deleteUser);
 
 module.exports = router;
