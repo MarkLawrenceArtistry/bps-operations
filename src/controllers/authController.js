@@ -83,8 +83,20 @@ const createUser = async (req, res) => {
     try {
         const { username, email, password, role_id } = req.body;
 
+        // 1. CHECK EXISTENCE
         if(!username || !email || !password || !role_id) {
             return res.status(400).json({success:false,data:"All fields are required."})
+        }
+
+        // 2. CHECK PASSWORD LENGTH
+        if(password.length < 8) {
+            return res.status(400).json({success:false,data:"Password must be at least 8 characters long."})
+        }
+
+        // 3. CHECK EMAIL FORMAT
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailRegex.test(email)) {
+            return res.status(400).json({success:false,data:"Invalid email format."})
         }
 
         const salt = await bcrypt.genSalt(10);
