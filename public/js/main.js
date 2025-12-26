@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // CONSTANTS
     const loginForm = document.querySelector('#login-form')
     const contentDiv = document.querySelector('#content')
-    const navWrapper = document.querySelector('.nav-wrapper') 
+    const navWrapper = document.querySelector('.nav-wrapper')
+
 
     // GENERAL VARIABLES
     // Pag may bagong page, 1. DAGDAG mo sa switch case
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const navItem = e.target.closest('.nav-item')
+            console.log(navItem)
 
             // 2. dagdag mo rito pangalawa
             if(navItem) {

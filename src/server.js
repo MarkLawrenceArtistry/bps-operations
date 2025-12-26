@@ -4,6 +4,11 @@ const cors = require('cors');
 const { db, initDB } = require('./database');
 const path = require('path');
 
+if (!process.env.JWT_SECRET) {
+    console.error("FATAL ERROR: JWT_SECRET is not defined.");
+    process.exit(1);
+}
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
 
