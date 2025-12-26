@@ -5,70 +5,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // CONSTANTS
     const loginForm = document.querySelector('#login-form')
-    const navigationBar = document.querySelector('.nav-wrapper')
     const contentDiv = document.querySelector('#content')
+    const navWrapper = document.querySelector('.nav-wrapper') 
 
     // GENERAL VARIABLES
+    // Pag may bagong page, 1. DAGDAG mo sa switch case
+    const router = async () => {
+        const hash = window.location.hash || '#dashboard';
 
+        contentDiv.innerHTML = '<div>Loading data..</div>';
 
-
-    // (NAVIGATION)
-    // Pag may new page
-    // 1. Set yung event dito
-    if(navigationBar) {
-        navigationBar.addEventListener('click', async (e) => {
-            e.preventDefault()
-
-            const target = e.target
-            
-            if(target.id === 'nav-accounts') {
-                const token = JSON.parse(localStorage.getItem('token'))
-                let data = await api.getAllUsers(token)
-                render.renderManageUsers(contentDiv, data);
-            } else if(target.id === 'nav-dashboard') {
-                render.renderDashboard(contentDiv);
-            }
-
-            activePage(target.id)
-        })
-    }
-
-
-    // (HELPERS)
-    function activePage(id) {
-        localStorage.setItem('activePage', JSON.stringify(id))
-    }
-    function renderActive() {
-        const savedActive = JSON.parse(localStorage.getItem('activePage')) || null;
-        if(savedActive !== null) {
-            navigateTo(savedActive)
-        } else {
-            navigateTo("nav-dashboard")
-        }
-    }
-    renderActive();
-    // 2. Set ng endpoint dito
-    // END
-    function navigateTo(savedActive) {
-        if(savedActive === "nav-accounts") {
-            render.renderManageUsers(contentDiv);
-        } else if(savedActive === "nav-dashboard") {
-            render.renderDashboard(contentDiv);
-        } 
-    }
-
-    async function renderAlways() {
         try {
-            if(JSON.parse(localStorage.getItem('activePage')) === 'nav-accounts'){
-                const token = JSON.parse(localStorage.getItem('token'))
-                let data = await api.getAllUsers(token)
-                render.renderManageUsers(contentDiv, data);
+            switch(hash) {
+                case '#dashboard':
+                    render.renderDashboard(contentDiv);
+                    break;
+                case '#accounts':
+                    const token = JSON.parse(localStorage.getItem('token'))
+                    const users = await api.getAllUsers(token)
+                    render.renderManageUsers(contentDiv, users)
+                    break;
+                default:
+                    contentDiv.innerHTML = `<h1>Not Found 404</h1>`
             }
         } catch(err) {
             console.error(err)
+            if(err.message.includes("Unauthorized") || err.message.includes("token")) {
+                alert("Session expired. Please login again.")
+                localStorage.removeItem('token')
+                location.href = 'index.html'
+            } else {
+                contentDiv.innerHTML = `<p>Error loading data ${err.message}</p>`
+            }
         }
     }
-    renderAlways()
+    window.addEventListener('hashchange', router)
+    router();
+
+
+    // (NAVIGATION)
+    if(navWrapper) {
+        navWrapper.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const navItem = e.target.closest('.nav-item')
+
+            // 2. dagdag mo rito pangalawa
+            if(navItem) {
+                const idToHash = {
+                    'nav-dashboard': 'dashboard',
+                    'nav-accounts': 'accounts'
+                }
+
+                const targetHash = idToHash[navItem.id]
+                if(targetHash) {
+                    window.location.hash = targetHash
+                }
+            }
+        })
+    }
+
+    // (HELPERS)
+    
 
 
 

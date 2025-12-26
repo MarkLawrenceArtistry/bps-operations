@@ -30,6 +30,10 @@ export async function getAllUsers(token) {
             'Authorization': `Bearer ${token}`
 		}
 	})
+
+    if(response.status === 401 || response.status === 403) {
+        throw new Error('Unauthorized.')
+    }
 	
 	if(!response.ok) {
 		throw new Error('Error getting all users.')
