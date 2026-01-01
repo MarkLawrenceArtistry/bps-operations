@@ -109,9 +109,6 @@ export function renderManageUsers(contentDiv, data) {
     let addNewUserBtn = contentDiv.querySelector('#add-new-user')
     let cancelBtn = contentDiv.querySelector('#cancel-user')
 
-    let updateUserForm = contentDiv.querySelector('#user-update-form')
-    let cancelUpdateBtn = contentDiv.querySelector('#cancel-update')
-
     if(usersTable) {
         usersTable.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -154,27 +151,31 @@ export function renderManageUsers(contentDiv, data) {
     }
     if(userForm) {
         userForm.addEventListener('submit', async (e) => {
-            e.preventDefault()
+            try {
+                e.preventDefault()
             
-            const data = {
-                username: userForm.querySelector('.user-username').value.trim() || null,
-                email: userForm.querySelector('.user-email').value.trim() || null,
-                password: userForm.querySelector('.user-password').value.trim() || null,
-                role_id: userForm.querySelector('.user-role').value.trim() || null
-            }
+                const data = {
+                    username: userForm.querySelector('.user-username').value.trim() || null,
+                    email: userForm.querySelector('.user-email').value.trim() || null,
+                    password: userForm.querySelector('.user-password').value.trim() || null,
+                    role_id: userForm.querySelector('.user-role').value.trim() || null
+                }
 
-            const token = JSON.parse(localStorage.getItem('token'));
-            const id = document.querySelector('.user-id').value;
-            console.log(id)
-            if (id) {
-                alert("Updated user successfully.")
-                await api.updateUser(token, data, id);
-            } else {
-                alert("Created user successfully.")
-                await api.createUser(token, data);
-            }
+                const token = JSON.parse(localStorage.getItem('token'));
+                const id = document.querySelector('.user-id').value;
+                console.log(id)
+                if (id) {
+                    await api.updateUser(token, data, id);
+                    alert("Updated user successfully.")
+                } else {
+                    await api.createUser(token, data);
+                    alert("Created user successfully.")
+                }
 
-            location.reload()
+                location.reload()
+            } catch(err) {
+                alert(`Error: ${err.message}`)
+            }
         })
     }
     if(addNewUserBtn){
