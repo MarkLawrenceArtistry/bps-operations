@@ -119,3 +119,20 @@ export async function disableAccount(id, token) {
 
     return result.data;
 }
+// (AUTH) Check Session
+export async function checkSession(token) {
+    const response = await fetch(`/api/auth/me`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+
+    const result = await response.json()
+    if(!result.success) {
+        throw new Error(result.data);
+    }
+
+    return result.data;
+}

@@ -11,5 +11,6 @@ router.put('/:id', verifyToken, isAdmin, authController.updateUser);
 
 router.put('/disable/:id', verifyToken, isAdmin, authController.disableUser);
 router.delete('/:id', verifyToken, isAdmin, authController.deleteUser);
+router.get('/me', verifyToken, authController.checkSession);
 
 module.exports = router;

@@ -176,8 +176,6 @@ const getUser = async(req, res) => {
     }
 }
 
-
-
 const disableUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -197,4 +195,15 @@ const disableUser = async (req, res) => {
     }
 }
 
-module.exports = { login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser }
+
+
+const checkSession = (req, res) => {
+    res.status(200).json({
+        success: true,
+        data: {
+            user: req.user
+        }
+    });
+};
+
+module.exports = { login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser, checkSession }

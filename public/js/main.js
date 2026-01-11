@@ -1,6 +1,8 @@
 import * as api from './api.js'
 import * as render from './render.js'
 
+let currentAccount = null;
+
 document.addEventListener('DOMContentLoaded', () => {
 
 
@@ -15,6 +17,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const accountListDiv = document.querySelector('#account-list');
 
 
+    // *********** HELPER FUNCTIONS *************
+    async function checkSession() {
+        try {
+            const token = JSON.parse(localStorage.getItem('token'));
+            // kailangan ng token dito para dumaan siya sa verifyToken middleware pero di na siya gagamitin sa controller
+			const result = await api.checkSession(token);
+            console.log(result)
+            applyRoleBasedUI();
+		} catch(err) {
+            alert(`Error: ${err.message}`);
+			if(err.message === "Invalid or expired token.") {
+                localStorage.removeItem('token')
+                location.href = 'index.html';
+            }
+		}
+    }
+    function applyRoleBasedUI() {
+        console.log(currentAccount)
+        if (!currentAccount) return;
+
+        if (currentAccount.role_id === 2) {
+            const adminLinks = document.querySelectorAll('.admin-nav');
+            adminLinks.forEach(link => {
+                link.style.display = 'none';
+            });
+        }
+    }
 
     // *********** RENDERERS *************
     async function loadAccounts() {
@@ -47,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = await api.loginAccount(credentials);
                 localStorage.setItem('token', JSON.stringify(data.token));
+                
+                currentAccount = data.user;
                 alert(`User ${data.user.username} successfully logged in.`);
 
                 loginForm.reset();
@@ -182,15 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
 
-    // (AUTH) Gatekeepers
-    if(!(window.location.pathname.endsWith('index.html'))) {
-        // TODO: create a api/controller that checks if the token is verified/valid and put it on else statement.
+    // (AUTH) GATEKEEPERS
+    if(!window.location.pathname.endsWith('index.html')) {
+        checkSession();
 
         if(!localStorage.getItem('token')) {
             alert('You must be logged in to view this page. Redirecting..')
             window.location.href = 'index.html'
-        } else {
-
         }
     }
     if(window.location.pathname.endsWith('index.html') && localStorage.getItem('token')) {
