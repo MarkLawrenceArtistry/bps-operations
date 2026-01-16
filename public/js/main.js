@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const accountListDiv = document.querySelector('#account-list');
     const inventoryCategoriesListDiv = document.querySelector('#inventory-category-list');
     const inventoryListDiv = document.querySelector('#inventory-list');
+    const openCategoryFormBtn = document.querySelector('#open-category-form-btn');
+    
+    // Form Wrappers
+    const inventoryFormWrapper = document.getElementById('inventory-form-wrapper');
+    const categoryFormWrapper = document.getElementById('category-form-wrapper');
+    const categoryManagementArea = document.getElementById('category-management-area');
+
 
 
 
@@ -69,6 +76,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 		}
     }
+    async function populateCategories() {
+        try {
+            const token = JSON.parse(localStorage.getItem('token'));
+            const categories = await api.getAllInventoryCategories(token);
+            const categorySelect = document.querySelector('#inventory-category');
+            if (categorySelect) {
+                categorySelect.innerHTML = '<option value="">Select Category..</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    categorySelect.appendChild(option);
+                });
+            }
+        } catch (err) {
+            console.error('Error populating categories:', err);
+        }
+    }
+
 
 
 
@@ -109,14 +135,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     }
+    const formWrapper = document.querySelector('.form-wrapper');
+
     // (AUTH) CREATE/UPDATE
     if(createAccountBtn) {
         createAccountBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
             accountForm.reset();
-            accountForm.style.display = "block";
-            cancelAccountBtn.style.display = "block";
+            if (formWrapper) formWrapper.classList.remove('hidden-area');
+            if (createAccountBtn) createAccountBtn.classList.add('hidden-area');
             accountForm.querySelector('#form-title').innerText = "Create New Account";
         })
     }
@@ -125,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             accountForm.reset();
-            accountForm.style.display = "none";
-            cancelAccountBtn.style.display = "none";
+            if (formWrapper) formWrapper.classList.add('hidden-area');
+            if (createAccountBtn) createAccountBtn.classList.remove('hidden-area');
         })
     }
     if(accountForm) {
@@ -177,6 +205,28 @@ document.addEventListener('DOMContentLoaded', () => {
         loadData(api.getAllAccounts, render.renderAccountsTable, accountListDiv);
 
         accountListDiv.addEventListener('click', async (e) => {
+            // Dropdown Toggle Logic
+            if (e.target.closest('.action-btn')) {
+                e.preventDefault();
+                const dropdown = e.target.closest('.action-dropdown').querySelector('.dropdown-content');
+                document.querySelectorAll('.dropdown-content').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                dropdown.classList.toggle('show');
+                return;
+            }
+
+            // Close dropdowns when clicking elsewhere
+            if (!e.target.closest('.action-dropdown')) {
+                document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            }
+
+            if (e.target.closest('.btn')) {
+                // Keep the row action logic below
+            } else {
+                return;
+            }
+
             e.preventDefault();
 
             const row = e.target.closest('tr');
@@ -185,7 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if(e.target.classList.contains('edit-btn')) {
                 accountForm.reset();
-                accountForm.style.display = "block"
+                const formWrapper = document.querySelector('.form-wrapper');
+                if (formWrapper) formWrapper.style.display = "block";
+                if (createAccountBtn) createAccountBtn.style.display = "none";
+                accountForm.style.display = "flex"
                 cancelAccountBtn.style.display = "block"
 
                 const account = await api.getAccount(account_id, token)
@@ -226,25 +279,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // *********** INVENTORY *************
     // (INVENTORY CATEGORIES) CREATE
+    // (INVENTORY CATEGORIES) MANAGE/CREATE
+    // (INVENTORY) CREATE/UPDATE Forms toggling
+
     if(createInventoryCategoryBtn) {
         createInventoryCategoryBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
-            inventoryCategoryForm.reset();
-            inventoryCategoryForm.style.display = "block";
-            cancelInventoryCategoryBtn.style.display = "block";
-            inventoryCategoryForm.querySelector('#form-title').innerText = "Create New Inventory Category";
+            // Toggle category management area (the table)
+            const isHidden = !categoryManagementArea || categoryManagementArea.classList.contains('hidden-area');
+            if (categoryManagementArea) {
+                if (isHidden) categoryManagementArea.classList.remove('hidden-area');
+                else categoryManagementArea.classList.add('hidden-area');
+            }
+            createInventoryCategoryBtn.classList.toggle('active', isHidden);
+
+            // Hide the category form if it was open
+            if (categoryFormWrapper) categoryFormWrapper.classList.add('hidden-area');
         })
     }
     if(cancelInventoryCategoryBtn) {
         cancelInventoryCategoryBtn.addEventListener('click', (e) => {
             e.preventDefault();
-
-            inventoryCategoryForm.reset();
-            inventoryCategoryForm.style.display = "none";
-            cancelInventoryCategoryBtn.style.display = "none";
+            if (categoryFormWrapper) categoryFormWrapper.classList.add('hidden-area');
         })
     }
+    if(openCategoryFormBtn) {
+        openCategoryFormBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            inventoryCategoryForm.reset();
+            
+            // Mutual exclusion: Hide inventory form if it was open
+            if (inventoryFormWrapper) inventoryFormWrapper.classList.add('hidden-area');
+            if (createInventoryBtn) createInventoryBtn.classList.remove('hidden-area');
+
+            if (categoryFormWrapper) categoryFormWrapper.classList.remove('hidden-area');
+        })
+    }
+
     if(inventoryCategoryForm) {
         inventoryCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -311,19 +383,26 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(row)
 
             if(e.target.classList.contains('edit-btn')) {
-                inventoryForm.style.display = "block"
-                cancelInventoryBtn.style.display = "block"
-                inventoryForm.querySelector('.inventory-image').style.display = "block"
+                if (inventoryFormWrapper) inventoryFormWrapper.classList.remove('hidden-area');
+                if (createInventoryBtn) createInventoryBtn.classList.add('hidden-area');
+                
+                // Hide category form if open
+                if (categoryFormWrapper) categoryFormWrapper.classList.add('hidden-area');
+
+                const previewImg = inventoryForm.querySelector('#form-image-preview');
+                if (previewImg) previewImg.classList.remove('hidden-area');
                 inventoryForm.reset();
 
                 const inventoryItem = await api.getInventory(inventory_id, token)
                 inventoryForm.querySelector('#form-title').innerText = "Update Existing Inventory Item"
+                
+                await populateCategories();
 
                 inventoryForm.querySelector('#inventory-name').value = inventoryItem.name
                 inventoryForm.querySelector('#inventory-category').value = inventoryItem.category_id;
                 inventoryForm.querySelector('#inventory-quantity').value = inventoryItem.quantity; 
                 inventoryForm.querySelector('#inventory-minstock').value = inventoryItem.min_stock_level;
-                inventoryForm.querySelector('.inventory-image').src = inventoryItem.image_url;
+                if (previewImg) previewImg.src = inventoryItem.image_url;
                 inventoryForm.querySelector('#inventory-id').value = inventoryItem.id;
             }
 
@@ -346,13 +425,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             inventoryForm.reset(); 
             
-            inventoryForm.querySelector('#inventory-id').value = "";
-            inventoryForm.querySelector('.inventory-image').src = "";
-            inventoryForm.querySelector('.inventory-image').style.display = "none"; 
-            inventoryForm.querySelector('#form-title').innerText = "Create New Inventory Item";
+            const previewImg = inventoryForm.querySelector('#form-image-preview');
 
-            inventoryForm.style.display = "block";
-            cancelInventoryBtn.style.display = "block";
+            inventoryForm.querySelector('#inventory-id').value = "";
+            if (previewImg) {
+                previewImg.src = "";
+                previewImg.style.display = "none"; 
+            }
+            inventoryForm.querySelector('#form-title').innerText = "Create New Inventory Item";
+            populateCategories();
+
+            // Mutual exclusion: Hide category form if it was open
+            if (categoryFormWrapper) categoryFormWrapper.classList.add('hidden-area');
+
+            if (inventoryFormWrapper) inventoryFormWrapper.classList.remove('hidden-area');
+            if (createInventoryBtn) createInventoryBtn.classList.add('hidden-area');
         })
     }
     if(cancelInventoryBtn) {
@@ -360,9 +447,11 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             inventoryForm.reset();
-            inventoryForm.style.display = "none";
-            cancelInventoryBtn.style.display = "none";
-            inventoryForm.querySelector('.inventory-image').style.display = "none"
+            if (inventoryFormWrapper) inventoryFormWrapper.classList.add('hidden-area');
+            if (createInventoryBtn) createInventoryBtn.classList.remove('hidden-area');
+            
+            const previewImg = inventoryForm.querySelector('#form-image-preview');
+            if (previewImg) previewImg.classList.add('hidden-area');
         })
     }
     if(inventoryForm) {
@@ -412,9 +501,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    // (DASHBOARD) INITIALIZATION
+    async function initDashboard() {
+        const lowStockList = document.querySelector('#low-stock-list');
+        const lowStockCountEl = document.querySelector('.card:nth-child(1) .card-value'); // First summary card
+        
+        if (!lowStockList) return;
+
+        try {
+            const token = JSON.parse(localStorage.getItem('token'));
+            const inventory = await api.getAllInventory(token);
+            
+            const lowStockItems = inventory.filter(item => item.quantity <= item.min_stock_level);
+            
+            // Update summary card value
+            if (lowStockCountEl) {
+                lowStockCountEl.textContent = lowStockItems.length;
+            }
+
+            // Render widget list
+            render.renderLowStockWidget(lowStockItems, lowStockList);
+        } catch (err) {
+            console.error('Error initializing dashboard:', err);
+            if (lowStockList) {
+                lowStockList.innerHTML = `<p class="no-data">Failed to load stock data.</p>`;
+            }
+        }
+    }
+
     // (AUTH) GATEKEEPERS
     if(!window.location.pathname.endsWith('index.html')) {
         checkSession();
+        
+        // Initialize page specific data
+        if(window.location.pathname.endsWith('dashboard.html')) {
+            initDashboard();
+        }
 
         if(!localStorage.getItem('token')) {
             alert('You must be logged in to view this page. Redirecting..')

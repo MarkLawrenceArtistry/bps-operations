@@ -10,102 +10,143 @@
     <div class="content">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>Welcome</h1>
-                <p>BPS Records Management System</p>
+                <img src="logo/Bicodo Postal Services Logo.png" alt="BPS Logo" class="sidebar-logo">
+                <div class="welcome-section">
+                    <h2>Welcome Back!</h2>
+                    <p>BPS Operations System</p>
+                </div>
             </div>
 
             <div class="sidebar-content">
-                <a class="nav-item" href="dashboard.html">
-                    <img src="../">
-                    <label>Dashboard</label>
-                </a>
-                <a class="nav-item" href="audit-log.html">
-                    <img src="../">
-                    <label>Audit Log</label>
-                </a>
-                <a class="nav-item" href="inventory.html">
-                    <img src="../">
-                    <label>Inventory</label>
-                </a>
-                <a class="nav-item" href="reports.html">
-                    <img src="../">
-                    <label>Reports</label>
-                </a>
-                <a class="nav-item" href="sellers.html">
-                    <img src="../">
-                    <label>Sellers</label>
-                </a>
-                <a class="nav-item" href="rts.html">
-                    <img src="../">
-                    <label>Returned-to-Seller</label>
-                </a>
-                <a class="nav-item" href="documents.html">
-                    <img src="../">
-                    <label>Documents</label>
-                </a>
-                <a class="nav-item admin-nav" href="sales.html">
-                    <img src="../">
-                    <label>Sales</label>
-                </a>
-                <a class="nav-item admin-nav active" href="accounts.html">
-                    <img src="../">
-                    <label>Accounts</label>
-                </a>
+                <div class="nav-section">
+                    <div class="section-title">Overview</div>
+                    <a class="nav-item" href="dashboard.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png" alt="" class="nav-icon">
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="nav-item" href="audit-log.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png" alt="" class="nav-icon">
+                        <span>Audit Log</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="section-title">Staff</div>
+                    <a class="nav-item" href="inventory.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png" alt="" class="nav-icon">
+                        <span>Inventory</span>
+                    </a>
+                    <a class="nav-item" href="sellers.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png" alt="" class="nav-icon">
+                        <span>Sellers</span>
+                    </a>
+                    <a class="nav-item" href="rts.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png" alt="" class="nav-icon">
+                        <span>Returned-to-Seller</span>
+                    </a>
+                    <a class="nav-item" href="documents.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png" alt="" class="nav-icon">
+                        <span>Documents</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="section-title">Admin</div>
+                    <a class="nav-item" href="sales.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png" alt="" class="nav-icon">
+                        <span>Sales</span>
+                    </a>
+                    <a class="nav-item active" href="accounts.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png" alt="" class="nav-icon">
+                        <span>Accounts</span>
+                    </a>
+                </div>
             </div>
 
             <div class="sidebar-footer">
-                <button id="logout-button">Logout</button>
+                <a href="#" id="logout-button" class="nav-item">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sign-out.png" alt="" class="nav-icon">
+                    <span>Log out</span>
+                </a>
             </div>
         </div>
 
         <div class="main-content">
-            <div class="main-header">
-                <h1>Manage Accounts</h1>
+            <header class="main-header">
+                <div class="title-area">
+                    <h1>Manage User Accounts</h1>
+                    <div class="pill-filters">
+                        <button class="pill-btn active">Staffs</button>
+                        <button class="pill-btn">Admin</button>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <span class="username">Username</span>
+                    <span class="role">Role</span>
+                </div>
+            </header>
 
-                <button id="create-account-btn">Create New</button>
-                <div class="form-wrapper">
-                    <form id="account-form">
+            <div class="toolbar">
+                <div class="search-container">
+                    <img src="Icons/Manage User Acc Page/search_icon.png" alt="" class="search-icon">
+                    <input type="text" id="account-search" placeholder="Search">
+                </div>
+                <button id="create-account-btn" class="add-btn">
+                    <img src="Icons/Manage User Acc Page/add_account_icon.png" alt="" class="add-icon">
+                    Add New Account
+                </button>
+            </div>
+
+            <div class="main-layout">
+                <div class="table-area">
+                    <div class="table-container card">
+                        <div id="account-list">
+                            <!-- Table injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="page-arrow">&lt;</button>
+                        <span class="page-num">1</span>
+                        <span class="page-num active">2</span>
+                        <span class="page-num">3</span>
+                        <span class="page-num">4</span>
+                        <span class="page-num">5</span>
+                        <span class="page-num">6</span>
+                        <button class="page-arrow">&gt;</button>
+                    </div>
+                </div>
+
+                <!-- Side Form Panel -->
+                <div class="form-wrapper hidden-area">
+                    <form id="account-form" class="card">
                         <h3 id="form-title">Create New Account</h3>
-
-                        <input type="text" id="account-id" style="display: none;">
-
+                        <input type="text" id="account-id" class="hidden-area" title="Account ID">
                         <div class="form-item">
                             <label>Username</label>
                             <input type="text" id="account-username" placeholder="Enter account username..">
                         </div>
-
                         <div class="form-item">
                             <label>Email</label>
                             <input type="email" id="account-email" placeholder="Enter account email..">
                         </div>
-
                         <div class="form-item">
                             <label>Role</label>
-                            <select id="account-role">
+                            <select id="account-role" title="Select user role">
                                 <option value="1">Admin</option>
                                 <option value="2">Staff</option>
                             </select>
                         </div>
-
                         <div class="form-item">
                             <label>Password</label>
                             <input type="password" id="account-password" placeholder="Min. 8 Characters..">
                         </div>
-
-                        <button type="submit">Submit</button>
-                        <button type="button" id="cancel-account-btn">Cancel</button>
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">Submit</button>
+                            <button type="button" id="cancel-account-btn" class="cancel-btn">Cancel</button>
+                        </div>
                     </form>
                 </div>
-            </div>
-
-            <div class="main">
-                <div id="account-list">
-                    
-                </div>
-            </div>
-
-            <div class="main-footer">
-
             </div>
         </div>
     </div>

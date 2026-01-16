@@ -3,63 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Returned-to-Seller - BPS Records Management System</title>
+    <title>Manage Returns - BPS Records Management System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="content">
+        <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>Welcome</h1>
-                <p>BPS Records Management System</p>
+                <img src="logo/Bicodo Postal Services Logo.png" alt="BPS Logo" class="sidebar-logo">
+                <div class="welcome-section">
+                    <h2>Welcome Back!</h2>
+                    <p>BPS Operations System</p>
+                </div>
             </div>
 
             <div class="sidebar-content">
-                <a class="nav-item" href="dashboard.html">
-                    <img src="../">
-                    <label>Dashboard</label>
-                </a>
-                <a class="nav-item" href="audit-log.html">
-                    <img src="../">
-                    <label>Audit Log</label>
-                </a>
-                <a class="nav-item" href="inventory.html">
-                    <img src="../">
-                    <label>Inventory</label>
-                </a>
-                <a class="nav-item" href="reports.html">
-                    <img src="../">
-                    <label>Reports</label>
-                </a>
-                <a class="nav-item" href="sellers.html">
-                    <img src="../">
-                    <label>Sellers</label>
-                </a>
-                <a class="nav-item active" href="rts.html">
-                    <img src="../">
-                    <label>Returned-to-Seller</label>
-                </a>
-                <a class="nav-item" href="documents.html">
-                    <img src="../">
-                    <label>Documents</label>
-                </a>
-                <a class="nav-item admin-nav" href="sales.html">
-                    <img src="../">
-                    <label>Sales</label>
-                </a>
-                <a class="nav-item admin-nav" href="accounts.html">
-                    <img src="../">
-                    <label>Accounts</label>
-                </a>
+                <div class="nav-section">
+                    <div class="section-title">Overview</div>
+                    <a class="nav-item" href="dashboard.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png" alt="" class="nav-icon">
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="nav-item" href="audit-log.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png" alt="" class="nav-icon">
+                        <span>Audit Log</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="section-title">Staff</div>
+                    <a class="nav-item" href="inventory.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png" alt="" class="nav-icon">
+                        <span>Inventory</span>
+                    </a>
+                    <a class="nav-item" href="sellers.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png" alt="" class="nav-icon">
+                        <span>Sellers</span>
+                    </a>
+                    <a class="nav-item active" href="rts.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png" alt="" class="nav-icon">
+                        <span>Returned-to-Seller</span>
+                    </a>
+                    <a class="nav-item" href="documents.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png" alt="" class="nav-icon">
+                        <span>Documents</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="section-title">Admin</div>
+                    <a class="nav-item" href="sales.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png" alt="" class="nav-icon">
+                        <span>Sales</span>
+                    </a>
+                    <a class="nav-item" href="accounts.html">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png" alt="" class="nav-icon">
+                        <span>Accounts</span>
+                    </a>
+                </div>
             </div>
 
             <div class="sidebar-footer">
-                <button id="logout-button">Logout</button>
+                <a href="#" id="logout-button" class="nav-item">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sign-out.png" alt="" class="nav-icon">
+                    <span>Log out</span>
+                </a>
             </div>
         </div>
 
+        <!-- MAIN CONTENT -->
         <div class="main-content">
-            <h1>Welcome - Returned-to-Seller</h1>
+            <header class="main-header">
+                <h1>Manage Returns</h1>
+                <div class="user-profile">
+                    <span class="username">Username</span>
+                    <span class="role">Role</span>
+                </div>
+            </header>
+
+            <div class="main-layout">
+                <div class="table-area">
+                    <div class="table-container card rts-container">
+                        <div class="rts-toolbar">
+                            <div class="toolbar-left">
+                                <button class="tool-btn secondary">Filter</button>
+                                <button class="tool-btn secondary">Status</button>
+                            </div>
+                            <button id="create-rts-btn" class="add-btn">
+                                <img src="Icons/Manage Inventory Page/add_icon_circle.png" alt="" class="add-icon">
+                                Add New Record
+                            </button>
+                        </div>
+                        
+                        <hr class="audit-divider">
+
+                        <table class="table" id="rts-table">
+                            <thead>
+                                <tr>
+                                    <th>Seller</th>
+                                    <th>Customer</th>
+                                    <th>Tracking No.</th>
+                                    <th>Product Description</th>
+                                    <th>Status</th>
+                                    <th>Staff ID</th>
+                                    <th>Created at</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rts-list">
+                                <!-- Return records will be rendered here -->
+                                <tr>
+                                    <td colspan="8" class="no-data">Loading return records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="page-arrow">&lt;</button>
+                        <span class="page-num active">1</span>
+                        <span class="page-num">2</span>
+                        <span class="page-num">3</span>
+                        <span class="page-num">4</span>
+                        <span class="page-num">5</span>
+                        <span class="page-num">6</span>
+                        <button class="page-arrow">&gt;</button>
+                    </div>
+                </div>
+
+                <!-- SIDE FORM PANEL FOR RTS -->
+                <div class="form-wrapper hidden-area" id="rts-form-wrapper">
+                    <form id="rts-form" class="card">
+                        <div class="card-header">
+                            <h3 id="form-title">Create New Return Record</h3>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-seller-id">Seller</label>
+                            <select id="rts-seller-id" required>
+                                <option value="">Select Seller</option>
+                            </select>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-customer">Customer Name</label>
+                            <input type="text" id="rts-customer" placeholder="Enter customer name.." required>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-tracking">Tracking Number</label>
+                            <input type="text" id="rts-tracking" placeholder="Enter tracking number.." required>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-product">Product Name</label>
+                            <input type="text" id="rts-product" placeholder="Enter product name..">
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-description">Reason / Description</label>
+                            <textarea id="rts-description" placeholder="Reason for return.."></textarea>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="rts-status">Status</label>
+                            <select id="rts-status">
+                                <option value="pending">Pending</option>
+                                <option value="returned_to_seller">Returned to Seller</option>
+                            </select>
+                        </div>
+
+                        <input type="hidden" id="rts-id">
+
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">Save Record</button>
+                            <button type="button" class="cancel-btn" id="cancel-rts-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 

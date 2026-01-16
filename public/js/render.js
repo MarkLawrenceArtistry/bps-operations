@@ -10,10 +10,11 @@ export function renderAccountsTable(result, container) {
     table.innerHTML = `
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Active</th>
+                <th>Role ID</th>
+                <th>Created at</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -24,32 +25,29 @@ export function renderAccountsTable(result, container) {
     result.forEach(element => {
         const row = document.createElement('tr');
         row.dataset.id = element.id;
-        row.classname = 'account-item';
+        row.className = 'account-item';
 
-        let roleVal = '';
-        if(element.role_id === 1) {
-            roleVal = 'Admin';
-        } else if(element.role_id === 2) {
-            roleVal = 'Staff';
-        }
-
-        let isActiveVal = '';
-        if(element.is_active === 1) {
-            isActiveVal = 'yes';
-        } else if(element.is_active === 0) {
-            isActiveVal = 'no';
-        }
+        let roleVal = element.role_id === 1 ? '1' : '2';
+        
+        // Formatting date if available, otherwise placeholder
+        const createdAt = element.created_at ? new Date(element.created_at).toLocaleDateString() : '12/20/2025';
 
         row.innerHTML = `
+            <td>${element.id}</td>
             <td>${element.username}</td>
             <td>${element.email}</td>
             <td>${roleVal}</td>
-            <td>${isActiveVal}</td>
+            <td>${createdAt}</td>
             <td>
-                <div class="action-buttons">
-                    <button class='btn edit-btn'>Edit</button>
-                    <button class='btn delete-btn'>Delete</button>
-                    <button class='btn disable-btn'>Disable</button>
+                <div class="action-dropdown">
+                    <button class='action-btn ripple'>
+                        <img src="Icons/Manage User Acc Page/actions_icon.png" alt="Actions" class="action-icon">
+                    </button>
+                    <div class="dropdown-content">
+                        <button class='btn edit-btn'>Edit</button>
+                        <button class='btn delete-btn'>Delete</button>
+                        <button class='btn disable-btn'>Disable</button>
+                    </div>
                 </div>
             </td>
         `;
@@ -58,7 +56,7 @@ export function renderAccountsTable(result, container) {
     });
     if(result.length < 1) {
         tbody.innerHTML = `
-            <td colspan="4" class="no-data" style="text-align:center;">There is no data here..</td>
+            <td colspan="6" class="no-data" style="text-align:center;">There is no data here..</td>
         `
     }
 
@@ -162,4 +160,39 @@ export function renderInventoryTable(result, container) {
     }
 
     container.appendChild(table)
+}
+
+// DASHBOARD LOW STOCK WIDGET
+export function renderLowStockWidget(items, container) {
+    if (!container) return;
+
+    if (items.length === 0) {
+        container.innerHTML = `<p class="no-data">All items are sufficiently stocked.</p>`;
+        return;
+    }
+
+    container.innerHTML = '';
+    items.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'low-stock-item';
+
+        const isCritical = item.quantity === 0;
+        const statusText = isCritical ? 'Critical' : 'Low';
+        const badgeClass = isCritical ? 'critical' : 'low';
+
+        itemEl.innerHTML = `
+            <div class="item-info">
+                <img src="${item.image_url}" alt="${item.name}" class="item-thumb">
+                <div class="item-details">
+                    <h4>${item.name}</h4>
+                    <p>Minimum: ${item.min_stock_level}</p>
+                </div>
+            </div>
+            <div class="item-status">
+                <span class="stock-count">${item.quantity} in stock</span>
+                <span class="status-badge ${badgeClass}">${statusText}</span>
+            </div>
+        `;
+        container.appendChild(itemEl);
+    });
 }

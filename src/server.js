@@ -31,4 +31,4 @@ app.use('/api/inventory', inventoryRoutes);
 // Initial Routes
 app.listen(PORT, () => {
     console.log(`The port is listening at http://localhost:${PORT}`);
-})
+});
