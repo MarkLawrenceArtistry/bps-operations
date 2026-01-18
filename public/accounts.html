@@ -10,61 +10,117 @@
     <div class="content">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>Welcome</h1>
-                <p>BPS Records Management System</p>
+                <img src="logo/Bicodo Postal Services Logo.png" alt="BPS Logo" class="sidebar-logo">
+                <div class="welcome-banner">
+                    <h2>Welcome Back!</h2>
+                    <p>BPS Operations System</p>
+                </div>
             </div>
 
             <div class="sidebar-content">
+                <!-- Overview Section -->
+                <div class="nav-category">Overview</div>
                 <a class="nav-item" href="dashboard.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png">
                     <label>Dashboard</label>
                 </a>
                 <a class="nav-item" href="audit-log.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png">
                     <label>Audit Log</label>
                 </a>
+
+                <!-- Staff Section -->
+                <div class="nav-category">Staff</div>
                 <a class="nav-item" href="inventory.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png">
                     <label>Inventory</label>
                 </a>
-                <a class="nav-item" href="reports.html">
-                    <img src="../">
-                    <label>Reports</label>
+                <a class="nav-item" href="inventory-categories.html" style="display: none;">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/inv_categories_icon.png">
+                    <label>Inventory Categories</label>
                 </a>
                 <a class="nav-item" href="sellers.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png">
                     <label>Sellers</label>
                 </a>
                 <a class="nav-item" href="rts.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png">
                     <label>Returned-to-Seller</label>
                 </a>
                 <a class="nav-item" href="documents.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png">
                     <label>Documents</label>
                 </a>
+
+                <!-- Admin Section -->
+                <div class="nav-category">Admin</div>
                 <a class="nav-item admin-nav" href="sales.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png">
                     <label>Sales</label>
                 </a>
                 <a class="nav-item admin-nav active" href="accounts.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png">
                     <label>Accounts</label>
                 </a>
             </div>
 
             <div class="sidebar-footer">
-                <button id="logout-button">Logout</button>
+                <button id="logout-button">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sign-out.png">
+                    Log out
+                </button>
             </div>
         </div>
 
         <div class="main-content">
-            <div class="main-header">
-                <h1>Manage Accounts</h1>
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Manage User Accounts</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <span class="user-name">Username</span>
+                        <span class="user-role">Role</span>
+                    </div>
+                </div>
+            </header>
 
-                <button id="create-account-btn">Create New</button>
+            <div class="account-tabs">
+                <button class="tab-btn active">Staffs</button>
+                <button class="tab-btn">Admin</button>
+            </div>
+
+            <div class="action-bar">
+                <div class="search-container">
+                    <img src="Icons/Manage User Acc Page/search_icon.png" class="search-icon">
+                    <input type="text" id="search-accounts" placeholder="Search">
+                </div>
+                <button id="create-account-btn">
+                    <img src="Icons/Manage User Acc Page/add_account_icon.png">
+                    Add New Account
+                </button>
+            </div>
+
+            <div class="main-table-container">
+                <div class="table-wrapper">
+                    <div id="account-list">
+                        <!-- Table will be rendered here by JS -->
+                    </div>
+                    
+                    <div class="pagination">
+                        <span class="page-arrow">&lt;</span>
+                        <span class="page-num active">1</span>
+                        <span class="page-num">2</span>
+                        <span class="page-num">3</span>
+                        <span class="page-num">4</span>
+                        <span class="page-num">5</span>
+                        <span class="page-num">6</span>
+                        <span class="page-arrow">&gt;</span>
+                    </div>
+                </div>
+
                 <div class="form-wrapper">
-                    <form id="account-form">
+                    <form id="account-form" style="display: none;">
                         <h3 id="form-title">Create New Account</h3>
 
                         <input type="text" id="account-id" style="display: none;">
@@ -92,20 +148,12 @@
                             <input type="password" id="account-password" placeholder="Min. 8 Characters..">
                         </div>
 
-                        <button type="submit">Submit</button>
-                        <button type="button" id="cancel-account-btn">Cancel</button>
+                        <div class="form-actions">
+                            <button type="submit">Submit</button>
+                            <button type="button" id="cancel-account-btn">Cancel</button>
+                        </div>
                     </form>
                 </div>
-            </div>
-
-            <div class="main">
-                <div id="account-list">
-                    
-                </div>
-            </div>
-
-            <div class="main-footer">
-
             </div>
         </div>
     </div>

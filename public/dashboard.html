@@ -10,56 +10,129 @@
     <div class="content">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>Welcome</h1>
-                <p>BPS Records Management System</p>
+                <img src="logo/Bicodo Postal Services Logo.png" alt="BPS Logo" class="sidebar-logo">
+                <div class="welcome-banner">
+                    <h2>Welcome Back!</h2>
+                    <p>BPS Operations System</p>
+                </div>
             </div>
 
             <div class="sidebar-content">
+                <!-- Overview Section -->
+                <div class="nav-category">Overview</div>
                 <a class="nav-item active" href="dashboard.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png">
                     <label>Dashboard</label>
                 </a>
                 <a class="nav-item" href="audit-log.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png">
                     <label>Audit Log</label>
                 </a>
+
+                <!-- Staff Section -->
+                <div class="nav-category">Staff</div>
                 <a class="nav-item" href="inventory.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png">
                     <label>Inventory</label>
                 </a>
-                <a class="nav-item" href="reports.html">
-                    <img src="../">
-                    <label>Reports</label>
+                <a class="nav-item" href="inventory-categories.html" style="display: none;">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/inv_categories_icon.png">
+                    <label>Inventory Categories</label>
                 </a>
                 <a class="nav-item" href="sellers.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png">
                     <label>Sellers</label>
                 </a>
                 <a class="nav-item" href="rts.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png">
                     <label>Returned-to-Seller</label>
                 </a>
                 <a class="nav-item" href="documents.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png">
                     <label>Documents</label>
                 </a>
+
+                <!-- Admin Section -->
+                <div class="nav-category">Admin</div>
                 <a class="nav-item admin-nav" href="sales.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png">
                     <label>Sales</label>
                 </a>
                 <a class="nav-item admin-nav" href="accounts.html">
-                    <img src="../">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png">
                     <label>Accounts</label>
                 </a>
             </div>
 
             <div class="sidebar-footer">
-                <button id="logout-button">Logout</button>
+                <button id="logout-button">
+                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sign-out.png">
+                    Log out
+                </button>
             </div>
         </div>
 
         <div class="main-content">
-            <h1>Welcome</h1>
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Overview</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <span class="user-name">Username</span>
+                        <span class="user-role">Role</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-stats">
+                <!-- Low Stocks Card -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total no. of</h3>
+                        <h2>Low Stocks</h2>
+                        <div class="stat-value">120+</div>
+                    </div>
+                    <div class="stat-icon red-icon">
+                        <img src="Icons/Dashboard Page/low_stocks_icon.png" alt="Low Stocks">
+                    </div>
+                </div>
+
+                <!-- Total Sales Card -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total sales of</h3>
+                        <h2>January</h2>
+                        <div class="stat-value">8,475k</div>
+                    </div>
+                    <div class="stat-icon green-icon">
+                        <img src="Icons/Dashboard Page/total_sales_icon.png" alt="Total Sales">
+                    </div>
+                </div>
+
+                <!-- Total Sellers Card -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total no. of</h3>
+                        <h2>Sellers</h2>
+                        <div class="stat-value">120+</div>
+                    </div>
+                    <div class="stat-icon purple-icon">
+                        <img src="Icons/Dashboard Page/total_sellers_icon.png" alt="Total Sellers">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Sales Chart Section -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h2>Average Sales per Month</h2>
+                    <p>Grand Total: 475k</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 

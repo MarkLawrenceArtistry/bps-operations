@@ -1,10 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    border: 1px solid red;
+    font-family: 'Poppins', sans-serif;
 }
 
+body {
+    background-color: #F8F9FD;
+}
+
+/* --- LOGIN PAGE STYLES --- */
+.container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #1a237e; /* Fallback/Base Blue */
+    overflow: hidden;
+}
+
+.image-area {
+    flex: 1;
+    background-color: #233484; /* Deep Blue from image */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 6rem;
+    position: relative;
+}
+
+.image-area h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+}
+
+.image-area p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    font-weight: 300;
+    max-width: 80%;
+}
+
+.form-area {
+    flex: 1.15; /* Wider form area */
+    background-color: white;
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+#login-form {
+    width: 100%;
+    max-width: 480px; /* Increased width */
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem; /* Increased gap */
+}
+
+.logo-container {
+    margin-bottom: 1.5rem;
+}
+
+.logo-container img {
+    height: 70px; /* Larger logo */
+}
+
+#login-form h1 {
+    font-size: 2.8rem; /* Larger title */
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.form-item label {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.form-item input {
+    padding: 16px 20px 16px 50px; /* Larger padding */
+    border-radius: 8px; /* Slightly more rounded */
+    border: 1px solid #7c7c7c;
+    background-color: #E8E8E8;
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    background-repeat: no-repeat;
+    background-position: 15px center;
+    background-size: 24px; /* Larger icon */
+}
+
+.form-item input:focus {
+    background-color: #fff;
+    border-color: #233484;
+}
+
+/* Input Icons */
+#login-email {
+    background-image: url('Icons/login_page/email_icon.png');
+}
+
+#login-password {
+    background-image: url('Icons/login_page/password_icon.png');
+}
+
+.forgot-password {
+    text-align: right;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    color: #233484;
+    text-decoration: underline;
+}
+
+button[type="submit"] {
+    background-color: #FF9F29; /* Orange */
+    color: white;
+    border: none;
+    padding: 18px; /* Larger button */
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 1.5rem;
+}
+
+button[type="submit"]:hover {
+    background-color: #e68a1c;
+}
+
+/* --- DASHBOARD / SIDEBAR STYLES --- */
 .content {
     display: flex;
     min-height: 100vh;
@@ -12,65 +158,552 @@
 
 .main-content {
     flex-grow: 1;
+    background-color: #F8F9FD;
+    padding: 2rem;
+    overflow-y: auto;
 }
 
-.active {
-    background-color: yellow;
-}
-
-
-
-
-
-
-
-
-
-
-/* SIDEBAR, CONTENT STYLES */
+/* Sidebar Refinements */
 .sidebar {
     display: flex;
     flex-direction: column;
-    flex-basis: 300px;
-    padding: 15px;
-    gap: 2rem;
+    flex-basis: 250px; /* Slightly narrower */
+    padding: 15px 12px; /* Reduced padding */
+    background-color: white;
+    border-right: none;
+    height: 100vh; /* Fill height */
 }
-.sidebar-content {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    gap: 1rem;
-    flex-grow: 1;
+
+.sidebar-header {
+    margin-bottom: 1.2rem; /* Reduced from 2rem */
+    padding: 0 5px;
 }
-.sidebar-footer button {
-    padding: 15px;
-    width: 100%;
+
+.sidebar-logo {
+    height: 45px; /* Smaller logo */
+    width: auto;
+    margin-bottom: 1rem;
 }
-.sidebar-footer button:hover {
-    background-color: gray;
+
+.welcome-banner h2 {
+    font-size: 1.3rem; /* Smaller font */
+    color: #333;
+    font-weight: 700;
+}
+
+.welcome-banner p {
+    color: #666;
+    font-size: 0.75rem; /* Smaller font */
+    margin-top: -2px;
+}
+
+.nav-category {
+    font-size: 0.65rem; /* Smaller font */
+    text-transform: uppercase;
+    background-color: #FF9F29;
     color: white;
+    padding: 5px 15px; /* More compact */
+    border-radius: 50px;
+    display: inline-block;
+    width: fit-content;
+    margin: 1rem 0 0.5rem 5px; /* Reduced margins */
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .nav-item {
-    padding: 5px;
+    padding: 8px 12px; /* Reduced padding */
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-size: 0.85rem; /* Smaller font */
+    font-weight: 500;
+    margin-bottom: 2px;
 }
+
 .nav-item:hover {
-    background-color: gray;
-    color: white;
+    background-color: #f5f5f5;
 }
 
+.nav-item.active {
+    background-color: #D6F1DD;
+    color: #1a1a1a;
+    font-weight: 600;
+}
 
+.nav-item img {
+    width: 18px; /* Slightly smaller icons */
+    height: 18px;
+    object-fit: contain;
+}
 
+/* Dashboard Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem; /* Reduced from 2.5rem */
+}
 
+.header-left h1 {
+    font-size: 1.8rem; /* Smaller font */
+    color: #333;
+    font-weight: 800;
+}
 
+.user-info {
+    text-align: right;
+}
 
+.user-name {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.user-role {
+    display: block;
+    font-size: 0.75rem;
+    color: #777;
+}
+
+/* Stats Layout */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; /* Reduced from 1.5rem */
+    margin-bottom: 2rem; /* Reduced from 3rem */
+}
+
+.stat-card {
+    background-color: white;
+    padding: 1.2rem 1.5rem; /* Reduced padding */
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+}
+
+.stat-info h3 {
+    font-size: 0.7rem; /* Smaller font */
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.stat-info h2 {
+    font-size: 1.1rem; /* Smaller font */
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.stat-value {
+    font-size: 2rem; /* Smaller font */
+    font-weight: 800;
+    color: #333;
+}
+
+.stat-icon {
+    width: 45px; /* Smaller icon containers */
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.stat-icon img {
+    width: 24px;
+    height: 24px;
+}
+
+/* Card Specific Colors */
+.stat-card:nth-child(1) .stat-icon { background-color: #F8E7E7; }
+.stat-card:nth-child(2) .stat-icon { background-color: #E7F8E9; }
+.stat-card:nth-child(3) .stat-icon { background-color: #EFE7F8; }
+
+/* Chart Section */
+.chart-section {
+    background-color: white;
+    padding: 1.5rem; /* Reduced from 2rem */
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-header h2 {
+    font-size: 1.1rem; /* Smaller font */
+    color: #333;
+    font-weight: 700;
+}
+
+.chart-header p {
+    color: #333;
+    font-size: 1.2rem; /* Smaller font */
+    font-weight: 700;
+}
+
+.chart-container {
+    height: 250px; /* Shorter chart */
+}
+
+/* Sidebar Footer / Logout */
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+#logout-button {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 8px;
+}
+
+#logout-button img {
+    width: 18px;
+    height: 18px;
+}
+
+/* --- ACCOUNTS PAGE STYLES --- */
+.account-tabs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background-color: #2D3A82; /* Dark Blue */
+    color: white;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.tab-btn.active {
+    background-color: #1E2B6D;
+}
+
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    position: relative;
+    width: 250px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+#search-accounts {
+    width: 100%;
+    padding: 8px 35px 8px 15px;
+    background-color: #E8E8E8;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+#create-account-btn {
+    background-color: #D6F1DD; /* Mint green */
+    color: #1b5e20;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+#create-account-btn img {
+    width: 16px;
+}
+
+.main-table-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.table-wrapper {
+    flex: 1;
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    /* Remove overflow to allow the action menu to overlap */
+    overflow: visible; 
+}
+
+#account-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#account-list th {
+    text-align: left;
+    color: #333;
+    font-weight: 700;
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+}
+
+#account-list th:nth-child(4),
+#account-list th:nth-child(5) {
+    text-align: center;
+}
+
+#account-list td {
+    padding: 12px;
+    color: #555;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #f9f9f9;
+    vertical-align: middle;
+}
+
+#account-list td:nth-child(4),
+#account-list td:nth-child(5) {
+    text-align: center;
+}
+
+/* Action Dropdown Menu */
+.action-buttons {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+    background-image: url('Icons/Manage User Acc Page/actions_icon.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.action-buttons:hover {
+    background-color: #f0f0f0;
+}
+
+/* Individual buttons as a vertical stack, positioned to the LEFT to avoid edge clipping */
+.action-buttons .btn {
+    display: none;
+    position: absolute;
+    right: 35px; /* Offset to the left of the dots */
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #eee;
+    padding: 8px 15px;
+    z-index: 1000; /* Ensure high stacking order */
+    white-space: nowrap;
+    min-width: 100px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+    text-indent: 0;
+}
+
+/* Vertical Stacking from Top to Bottom */
+.action-buttons:hover .edit-btn {
+    display: block;
+    top: 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.action-buttons:hover .delete-btn {
+    display: block;
+    top: 33px; 
+    border-radius: 0;
+    border-top: none;
+}
+
+.action-buttons:hover .disable-btn {
+    display: block;
+    top: 66px; 
+    border-radius: 0 0 6px 6px;
+    border-top: none;
+}
+
+/* Hover effect on each menu item */
+.action-buttons .btn:hover {
+    background-color: #f8f9fd !important;
+    color: #FF9F29 !important;
+}
+
+/* Invisible bridge to keep menu open while moving mouse */
+.action-buttons:hover::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 150px; /* Bridge across to the menu items */
+    height: 100px;
+    background: transparent;
+    z-index: 99;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.page-arrow, .page-num {
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.page-num.active {
+    color: #FF9F29;
+}
+
+.form-wrapper {
+    /* Dynamics: Allow table to expand when form is hidden */
+    transition: all 0.3s ease;
+}
+
+#account-form {
+    display: none; /* Hidden by default */
+    width: 300px;
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+}
+
+#account-form h3 {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.form-item {
+    margin-bottom: 12px;
+}
+
+.form-item label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    color: #333;
+}
+
+.form-item input, .form-item select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.form-actions button[type="submit"] {
+    flex: 1;
+    background-color: #FF9F29;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 0;
+}
+
+#cancel-account-btn {
+    padding: 10px;
+    border: 1px solid #eee;
+    background: none;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* Sidebar Footer cleanup */
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+#logout-button {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 8px;
+}
+
+#logout-button img {
+    width: 18px;
+    height: 18px;
+}
+
+/* Utilities */
 #account-form,
 #inventory-category-form,
 #cancel-account-btn,
 #cancel-inventory-category-btn,
 #inventory-form,
 #cancel-inventory-btn {
-    display: none;
+     display: none;
 }
