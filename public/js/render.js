@@ -47,6 +47,7 @@ export function renderAccountsTable(result, container) {
             <td>${isActiveVal}</td>
             <td>
                 <div class="action-buttons">
+                    <img src="Icons/Manage User Acc Page/actions_icon.png" class="actions-icon" alt="Actions">
                     <button class='btn edit-btn'>Edit</button>
                     <button class='btn delete-btn'>Delete</button>
                     <button class='btn disable-btn'>Disable</button>

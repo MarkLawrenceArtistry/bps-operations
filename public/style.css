@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+.hidden {
+    display: none;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -94,16 +98,13 @@ body {
 }
 
 .form-item input {
-    padding: 16px 20px 16px 50px; /* Larger padding */
+    padding: 16px 20px 16px 50px; /* Larger padding to accommodate icon */
     border-radius: 8px; /* Slightly more rounded */
     border: 1px solid #7c7c7c;
     background-color: #E8E8E8;
     font-size: 1.1rem;
     outline: none;
     transition: all 0.3s ease;
-    background-repeat: no-repeat;
-    background-position: 15px center;
-    background-size: 24px; /* Larger icon */
 }
 
 .form-item input:focus {
@@ -111,13 +112,26 @@ body {
     border-color: #233484;
 }
 
-/* Input Icons */
-#login-email {
-    background-image: url('Icons/login_page/email_icon.png');
+/* Input Icons (HTML-based) */
+.input-wrapper {
+    position: relative;
+    width: 100%;
 }
 
-#login-password {
-    background-image: url('Icons/login_page/password_icon.png');
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    pointer-events: none; /* Let clicks pass through to input */
+    z-index: 10;
+}
+
+#login-form .input-wrapper input {
+    width: 100%;
+    padding-left: 50px !important;
 }
 
 .forgot-password {
@@ -513,13 +527,14 @@ button[type="submit"]:hover {
     width: 32px;
     height: 32px;
     margin: 0 auto;
-    background-image: url('Icons/Manage User Acc Page/actions_icon.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 20px;
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.2s;
+}
+
+.actions-icon {
+    width: 20px;
+    height: 20px;
 }
 
 .action-buttons:hover {
