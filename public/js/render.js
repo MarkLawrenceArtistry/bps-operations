@@ -10,10 +10,11 @@ export function renderAccountsTable(result, container) {
     table.innerHTML = `
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Active</th>
+                <th>Role ID</th>
+                <th>Created at</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -26,25 +27,14 @@ export function renderAccountsTable(result, container) {
         row.dataset.id = element.id;
         row.classname = 'account-item';
 
-        let roleVal = '';
-        if(element.role_id === 1) {
-            roleVal = 'Admin';
-        } else if(element.role_id === 2) {
-            roleVal = 'Staff';
-        }
-
-        let isActiveVal = '';
-        if(element.is_active === 1) {
-            isActiveVal = 'yes';
-        } else if(element.is_active === 0) {
-            isActiveVal = 'no';
-        }
+        const createdAt = element.created_at ? new Date(element.created_at).toLocaleDateString() : '12/20/2025';
 
         row.innerHTML = `
+            <td>${element.id}</td>
             <td>${element.username}</td>
             <td>${element.email}</td>
-            <td>${roleVal}</td>
-            <td>${isActiveVal}</td>
+            <td>${element.role_id}</td>
+            <td>${createdAt}</td>
             <td>
                 <div class="action-buttons">
                     <button class='btn edit-btn'>Edit</button>
@@ -58,7 +48,7 @@ export function renderAccountsTable(result, container) {
     });
     if(result.length < 1) {
         tbody.innerHTML = `
-            <td colspan="4" class="no-data" style="text-align:center;">There is no data here..</td>
+            <td colspan="6" class="no-data" style="text-align:center;">There is no data here..</td>
         `
     }
 
