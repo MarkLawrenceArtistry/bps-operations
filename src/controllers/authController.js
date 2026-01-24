@@ -195,6 +195,24 @@ const disableUser = async (req, res) => {
     }
 }
 
+const enableUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await run(`
+            UPDATE users
+            SET is_active = 1
+            WHERE id = ?    
+        `, [id]);
+
+        await logAudit(req.user.id, 'UPDATE', 'users', id, `Re-enabled user ID: ${id}`, req.ip);
+
+        return res.status(200).json({success:true, data:"User re-enabled successfully!"});
+    } catch(err) {
+        return res.status(500).json({success:false, data:`Internal Server Error: ${err.message}`});
+    }
+}
+
 const checkSession = (req, res) => {
     res.status(200).json({
         success: true,
@@ -204,4 +222,4 @@ const checkSession = (req, res) => {
     });
 };
 
-module.exports = { login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser, checkSession }
+module.exports = { login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser, enableUser, checkSession }

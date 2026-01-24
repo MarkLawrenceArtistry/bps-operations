@@ -227,6 +227,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+
+            if(e.target.classList.contains('enable-btn')) {
+                if(confirm("Are you sure you want to re-enable this account?")) {
+                    try {
+                        await api.enableAccount(account_id, token);
+                        location.reload();
+                    } catch(err) {
+                        alert(`Error: ${err.message}`);
+                    }
+                }
+            }
         })
     }
     

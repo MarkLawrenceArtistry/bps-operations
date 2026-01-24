@@ -119,6 +119,23 @@ export async function disableAccount(id, token) {
 
     return result.data;
 }
+// (AUTH) Enable Account
+export async function enableAccount(id, token) {
+    const response = await fetch(`/api/auth/enable/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const result = await response.json();
+    if(!result.success) {
+        throw new Error(result.data);
+    }
+
+    return result.data;
+}
 // (AUTH) Check Session
 export async function checkSession(token) {
     const response = await fetch(`/api/auth/me`, {

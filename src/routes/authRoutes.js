@@ -12,6 +12,7 @@ router.post('/', verifyToken, isAdmin, authController.createUser);
 router.put('/:id', verifyToken, isAdmin, authController.updateUser);
 
 router.put('/disable/:id', verifyToken, isAdmin, authController.disableUser);
+router.put('/enable/:id', verifyToken, isAdmin, authController.enableUser);
 router.delete('/:id', verifyToken, isAdmin, authController.deleteUser);
 
 module.exports = router;

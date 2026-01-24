@@ -910,6 +910,19 @@ button[type="submit"]:hover {
 
 .table.accounts .action-buttons .edit-btn { top: -45px; }
 .table.accounts .action-buttons .delete-btn { top: -5px; }
+
+.enable-btn {
+    background-color: #d1fae5; /* Light mint green */
+    color: #047857; /* Dark green text */
+}
+
+.enable-btn:hover {
+    background-color: #a7f3d0;
+}
+
+/* Update the action menu positioning for the new button */
+/* Ensure the popup menu handles the enable button correctly */
+.table.accounts .action-buttons .enable-btn { top: 35px; } 
 .table.accounts .action-buttons .disable-btn { top: 35px; }
 
 .table.accounts .action-buttons:hover .btn {

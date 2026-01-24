@@ -13,7 +13,7 @@ export function renderAccountsTable(result, container) {
                 <th>Username</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Active</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -35,9 +35,16 @@ export function renderAccountsTable(result, container) {
 
         let isActiveVal = '';
         if(element.is_active === 1) {
-            isActiveVal = 'Yes';
+            isActiveVal = '<span class="status-badge active">Active</span>';
         } else if(element.is_active === 0) {
-            isActiveVal = 'No';
+            isActiveVal = '<span class="status-badge critical">Disabled</span>';
+        }
+
+        let toggleBtn = '';
+        if(element.is_active === 1) {
+            toggleBtn = `<button class='btn disable-btn'>Disable</button>`;
+        } else {
+            toggleBtn = `<button class='btn enable-btn'>Enable</button>`;
         }
 
         row.innerHTML = `
@@ -49,7 +56,7 @@ export function renderAccountsTable(result, container) {
                 <div class="action-buttons">
                     <button class='btn edit-btn'>Edit</button>
                     <button class='btn delete-btn'>Delete</button>
-                    <button class='btn disable-btn'>Disable</button>
+                    ${toggleBtn}
                 </div>
             </td>
         `;
@@ -76,6 +83,7 @@ export function renderInventoryCategoriesTable(result, container) {
     table.innerHTML = `
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Actions</th>
