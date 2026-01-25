@@ -5,10 +5,9 @@ const getDashboardStats = async (req, res) => {
         // 1. KPI: Low Stock Count
         const lowStock = await get(`SELECT COUNT(id) as count FROM inventory WHERE quantity < min_stock_level`);
 
-        // 2. KPI: Sales This Month (Dynamic)
+        // 2. KPI: Sales This Month
         const date = new Date();
-        const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]; // YYYY-MM-DD
-        
+        const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
         const salesThisMonth = await get(`
             SELECT SUM(total_amount) as total 
             FROM weekly_sales 
@@ -19,7 +18,6 @@ const getDashboardStats = async (req, res) => {
         const sellers = await get(`SELECT COUNT(id) as count FROM seller`);
 
         // 4. CHART DATA: Sales last 6 months
-        // SQLite query to group sales by Month (YYYY-MM)
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
@@ -32,16 +30,13 @@ const getDashboardStats = async (req, res) => {
             ORDER BY month ASC
         `, [sixMonthsAgoStr]);
 
-        // Format chart data for Chart.js
+        // Format data for Chart.js
         const labels = chartRawData.map(item => {
-            // Convert "2024-01" to "Jan 2024"
             const [y, m] = item.month.split('-');
             const d = new Date(y, m - 1);
             return d.toLocaleString('default', { month: 'short', year: 'numeric' });
         });
         const data = chartRawData.map(item => item.total);
-
-        // Calculate Grand Total for the "Text" above the chart
         const grandTotal = data.reduce((a, b) => a + b, 0);
 
         res.status(200).json({
@@ -50,11 +45,7 @@ const getDashboardStats = async (req, res) => {
                 lowStockCount: lowStock.count || 0,
                 salesMonthTotal: salesThisMonth.total || 0,
                 sellerCount: sellers.count || 0,
-                chart: {
-                    labels: labels,
-                    data: data,
-                    grandTotal: grandTotal
-                }
+                chart: { labels, data, grandTotal }
             }
         });
 
@@ -80,4 +71,9 @@ const getLowStockItems = async (req, res) => {
     }
 };
 
-module.exports = { getDashboardStats, getLowStockItems };
+const backupDatabase = (req, res) => {
+    // Keep your existing backup logic here if needed, or leave empty if not focusing on it right now
+    res.status(200).json({success: true, data: "Backup feature placeholder"});
+};
+
+module.exports = { getDashboardStats, getLowStockItems, backupDatabase };

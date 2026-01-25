@@ -32,7 +32,7 @@ function renderSalesChart(chartData) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
 
     // *********** CONSTANTS *************
@@ -741,24 +741,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-   // *********** DASHBOARD LOGIC *************
-    if (dashboardTable) {
-        loadData(api.getLowStockItems, render.renderLowStockWidget, dashboardTable);
-    }
-    if (salesChartCanvas) {
-        // We can't use the loadData helper here because the render function is different
-        (async () => {
-            try {
-                const token = JSON.parse(localStorage.getItem('token'));
-                const result = await api.getSalesChartData(token);
-                renderSalesChart(result);
-            } catch (err) {
-                console.error("Failed to load chart data:", err);
-            }
-        })();
-    }
     // *********** DASHBOARD LOGIC *************
-    if (document.querySelector('.stat-card')) { // Check if we are on dashboard page
+    if (document.querySelector('.stat-card')) { 
         try {
             const token = JSON.parse(localStorage.getItem('token'));
             
@@ -768,29 +752,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Load Stats & Chart
             const stats = await api.getDashboardStats(token);
 
-            // Update KPI Cards (Targeting via index or specific selectors)
+            // Update KPI Cards
             const statValues = document.querySelectorAll('.stat-value');
             if(statValues.length >= 3) {
-                // Low Stock Card
-                statValues[0].innerText = stats.lowStockCount;
-                
-                // Sales Card (Format as Currency)
-                statValues[1].innerText = new Intl.NumberFormat('en-PH', { 
-                    style: 'currency', 
-                    currency: 'PHP',
-                    maximumFractionDigits: 0 
-                }).format(stats.salesMonthTotal);
-                
-                // Sellers Card
-                statValues[2].innerText = stats.sellerCount;
+                statValues[0].innerText = stats.lowStockCount; // Low Stock
+                statValues[1].innerText = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(stats.salesMonthTotal); // Sales
+                statValues[2].innerText = stats.sellerCount; // Sellers
             }
 
             // Update Chart Text
             const chartTotalEl = document.querySelector('.chart-total');
             if(chartTotalEl) {
-                chartTotalEl.innerText = new Intl.NumberFormat('en-PH', { 
-                    style: 'currency', currency: 'PHP' 
-                }).format(stats.chart.grandTotal);
+                chartTotalEl.innerText = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(stats.chart.grandTotal);
             }
 
             // Render Chart
@@ -913,9 +886,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const id = row.dataset.id;
             const token = JSON.parse(localStorage.getItem('token'));
 
-            // DELETE
             if (e.target.classList.contains('delete-btn')) {
-                if (confirm('Are you sure you want to delete this document record?')) {
+                if (confirm('Delete this document?')) {
                     try {
                         await api.deleteDocument(id, token);
                         location.reload();
@@ -923,37 +895,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // EDIT (NEW FUNCTIONALITY)
-            if (e.target.classList.contains('edit-btn')) {
-                // Prevent "View" link default behavior if it's the edit button
-                e.preventDefault(); 
-                
-                // Note: In render.js, the 'edit-btn' is actually a 'View' link. 
-                // We need to change render.js to have a separate Edit button. 
-                // SEE STEP 2 BELOW.
-            }
-
-            // EDIT LOGIC (Actual)
+            // EDIT BUTTON CLICKED
             if (e.target.classList.contains('real-edit-btn')) {
                 documentForm.reset();
                 documentForm.style.display = 'block';
                 cancelDocumentBtn.style.display = 'block';
-                documentForm.querySelector('#form-title').innerText = "Update Document";
+                documentForm.querySelector('#form-title').innerText = "Update Document Info";
                 
-                // Set the ID in the hidden field
+                // Set ID
                 documentForm.querySelector('#document-id').value = id;
 
-                // Populate form from table data (or fetch from API if data isn't in DOM)
+                // Populate Fields (Order: Title, Category, Date)
                 const cells = row.querySelectorAll('td');
-                // Assuming render order: Title, Category, Date, Status, Actions
                 documentForm.querySelector('#document-title').value = cells[0].innerText;
                 documentForm.querySelector('#document-category').value = cells[1].innerText;
                 documentForm.querySelector('#document-expiry').value = cells[2].innerText;
 
-                // Hide file input for edit mode (optional, or make it optional)
+                // Hide file input (Can't edit file content this way)
                 documentForm.querySelector('#document-file').removeAttribute('required');
-                const label = documentForm.querySelector('label[for="document-file"]');
-                if(label) label.innerText = "Upload File (Leave empty to keep current)";
+                documentForm.querySelector('#document-file').closest('.form-item').style.display = 'none';
             }
         });
     }
@@ -963,12 +923,11 @@ document.addEventListener('DOMContentLoaded', () => {
             documentForm.style.display = 'block';
             cancelDocumentBtn.style.display = 'block';
             documentForm.querySelector('#form-title').innerText = "Upload New Document";
-            documentForm.querySelector('#document-id').value = ""; // Clear ID
+            documentForm.querySelector('#document-id').value = ""; 
             
-            // Make file required for new
+            // Show file input
+            documentForm.querySelector('#document-file').closest('.form-item').style.display = 'block';
             documentForm.querySelector('#document-file').setAttribute('required', 'true');
-            const label = documentForm.querySelector('label[for="document-file"]');
-            if(label) label.innerText = "Upload File";
         });
     }
     if (documentForm) {
@@ -978,37 +937,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const id = documentForm.querySelector('#document-id').value;
 
             if (id) {
-                // UPDATE MODE (JSON)
+                // UPDATE MODE
                 const data = {
                     title: documentForm.querySelector('#document-title').value,
                     category: documentForm.querySelector('#document-category').value,
                     expiry_date: documentForm.querySelector('#document-expiry').value
                 };
-
                 try {
                     await api.updateDocument(id, data, token);
-                    alert('Document updated successfully!');
+                    alert('Document updated!');
                     location.reload();
                 } catch (err) { alert(`Error: ${err.message}`); }
-
             } else {
-                // CREATE MODE (FormData)
+                // CREATE MODE
                 const formData = new FormData();
                 formData.append('title', documentForm.querySelector('#document-title').value);
                 formData.append('category', documentForm.querySelector('#document-category').value);
                 formData.append('expiry_date', documentForm.querySelector('#document-expiry').value);
-                
                 const fileInput = documentForm.querySelector('#document-file');
-                if (fileInput.files[0]) {
-                    formData.append('document', fileInput.files[0]);
-                } else {
-                    alert('Please select a file to upload.');
-                    return;
-                }
-
+                if (fileInput.files[0]) formData.append('document', fileInput.files[0]);
+                
                 try {
                     await api.createDocument(formData, token);
-                    alert('Document uploaded successfully!');
+                    alert('Uploaded successfully!');
                     location.reload();
                 } catch (err) { alert(`Error: ${err.message}`); }
             }

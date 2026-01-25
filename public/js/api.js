@@ -477,6 +477,20 @@ export async function getDashboardStats(token) {
     return result.data;
 }
 
+// (DASHBOARD) Low Stock
+export async function getLowStockItems(token) {
+    const response = await fetch('/api/dashboard/low-stock', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
+
 
 
 
@@ -567,14 +581,26 @@ export async function getAllDocuments(token) {
     if(!result.success) throw new Error(result.data);
     return result.data;
 }
-// (DOCUMENTS) Create
+// (DOCUMENTS) Create (Multipart)
 export async function createDocument(formData, token) {
     const response = await fetch('/api/documents', {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
+// (DOCUMENTS) Update (JSON) - NEW FUNCTION
+export async function updateDocument(id, data, token) {
+    const response = await fetch(`/api/documents/${id}`, {
+        method: 'PUT',
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: formData
+        body: JSON.stringify(data)
     });
     const result = await response.json();
     if(!result.success) throw new Error(result.data);
@@ -588,20 +614,6 @@ export async function deleteDocument(id, token) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         }
-    });
-    const result = await response.json();
-    if(!result.success) throw new Error(result.data);
-    return result.data;
-}
-// (DOCUMENTS) Update Document (JSON body for metadata updates)
-export async function updateDocument(id, data, token) {
-    const response = await fetch(`/api/documents/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json', // Important: We are sending JSON, not FormData
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
     });
     const result = await response.json();
     if(!result.success) throw new Error(result.data);

@@ -381,7 +381,7 @@ export function renderDocumentsTable(result, container) {
 
         const expiryDate = new Date(element.expiry_date);
         const today = new Date();
-        today.setHours(0,0,0,0); // Normalize today's date
+        today.setHours(0,0,0,0);
 
         let statusBadge = '<span class="status-badge active">Active</span>';
         if (expiryDate < today) {
@@ -397,7 +397,8 @@ export function renderDocumentsTable(result, container) {
             <td>${statusBadge}</td>
             <td>
                 <div class="action-buttons">
-                    <a href="${element.file_path}" target="_blank" class="btn edit-btn" style="text-decoration:none;">View</a>
+                    <a href="${element.file_path}" target="_blank" class="btn" style="background:#e0f2fe; color:#0369a1; text-decoration:none;">View</a>
+                    <button class='btn real-edit-btn' style="background-color: #f3f4f6; color: #1f2937;">Edit</button>
                     <button class='btn delete-btn'>Delete</button>
                 </div>
             </td>
