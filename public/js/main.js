@@ -1,5 +1,6 @@
 import * as api from './api.js'
 import * as render from './render.js'
+import { renderPagination } from './render.js'; 
 
 let currentAccount = null;
 
@@ -84,6 +85,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // AUDIT LOG
     const auditListDiv = document.querySelector('#audit-list');
 
+    // REPORTS
+    const btnGenInventory = document.querySelector('#btn-gen-inventory');
+    const btnGenSales = document.querySelector('#btn-gen-sales');
+
+
+    let state = {
+        auditPage: 1,
+        inventoryPage: 1
+        // add others...
+    };
+
 
 
     // *********** HELPER FUNCTIONS *************
@@ -124,6 +136,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 location.href = 'index.html';
             }
 		}
+    }
+    async function loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey) {
+        try {
+            const token = JSON.parse(localStorage.getItem('token'));
+            const result = await apiMethod(token, state[pageStateKey]); // Pass page number
+            
+            // Render Table
+            renderMethod(result.data, listDiv);
+            
+            // Render Pagination Controls
+            if(result.pagination && paginationDiv) {
+                renderPagination(result.pagination, paginationDiv, (newPage) => {
+                    state[pageStateKey] = newPage;
+                    loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey);
+                });
+            }
+        } catch(err) {
+            console.error(err);
+        }
     }
 
 
@@ -988,6 +1019,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             });
         }
+    }
+    const auditPaginationDiv = document.querySelector('.pagination'); // Ensure HTML has this class inside Audit page
+    if (document.querySelector('#audit-list')) {
+        loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, document.querySelector('#audit-list'), auditPaginationDiv, 'auditPage');
+    }
+
+
+
+
+
+    
+
+    // *********** REPORTS *************
+    if(btnGenInventory) {
+        btnGenInventory.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const token = JSON.parse(localStorage.getItem('token'));
+                await api.downloadReport(token, 'inventory');
+            } catch(err) { alert(err.message); }
+        });
+    }
+    if(btnGenSales) {
+        btnGenSales.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const start = document.querySelector('#report-start').value;
+            const end = document.querySelector('#report-end').value;
+            try {
+                const token = JSON.parse(localStorage.getItem('token'));
+                await api.downloadReport(token, 'sales', start, end);
+            } catch(err) { alert(err.message); }
+        });
     }
 
 

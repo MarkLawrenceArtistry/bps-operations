@@ -504,3 +504,43 @@ export function renderAuditLogTable(result, container) {
     }
     container.appendChild(table);
 }
+
+
+
+
+
+
+export function renderPagination(meta, container, onPageClick) {
+    container.innerHTML = '';
+    
+    if(meta.totalPages <= 1) return;
+
+    // Prev Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'page-arrow prev';
+    prevBtn.innerHTML = '&lt;';
+    prevBtn.disabled = meta.current === 1;
+    prevBtn.onclick = () => onPageClick(meta.current - 1);
+    container.appendChild(prevBtn);
+
+    // Numbers
+    const spanContainer = document.createElement('span');
+    spanContainer.className = 'page-numbers';
+    
+    for(let i = 1; i <= meta.totalPages; i++) {
+        const span = document.createElement('span');
+        span.className = `page-num ${i === meta.current ? 'active' : ''}`;
+        span.innerText = i;
+        span.onclick = () => onPageClick(i);
+        spanContainer.appendChild(span);
+    }
+    container.appendChild(spanContainer);
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'page-arrow next';
+    nextBtn.innerHTML = '&gt;';
+    nextBtn.disabled = meta.current === meta.totalPages;
+    nextBtn.onclick = () => onPageClick(meta.current + 1);
+    container.appendChild(nextBtn);
+}

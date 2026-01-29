@@ -1,12 +1,22 @@
 const sqlite3 = require('sqlite3');
 const bcrypt = require('bcryptjs');
-const DB_SOURCE = "bps.db";
+const path = require('path');
+const fs = require('fs');
+
+const DB_NAME = "bps.db";
+const DB_SOURCE = process.env.RAILWAY_VOLUME_MOUNT_PATH 
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, DB_NAME) 
+    : path.resolve(__dirname, '../', DB_NAME);
+
+console.log(`--- DATABASE SOURCE: ${DB_SOURCE} ---`);
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
     if(err) {
-        console.log(err.message);
+        console.error("DB Connection Error:", err.message);
+    } else {
+        console.log("Connected to SQLite database.");
     }
-})
+});
 
 const initDB = () => {
     db.serialize(() => {

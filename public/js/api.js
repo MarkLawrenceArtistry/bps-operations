@@ -626,19 +626,30 @@ export async function deleteDocument(id, token) {
 
 
 // (AUDIT) Get All Logs
-export async function getAuditLogs(token) {
-    const response = await fetch('/api/audit', {
+export async function getAuditLogs(token, page = 1) {
+    const response = await fetch(`/api/audit?page=${page}&limit=10`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result;
+}
+export async function downloadReport(token, type, start = '', end = '') {
+    const url = `/api/reports/download?type=${type}&startDate=${start}&endDate=${end}`;
+    
+    const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    const result = await response.json();
-    if(!result.success) {
-        throw new Error(result.data);
-    }
+    if (response.status !== 200) throw new Error("Failed to generate report");
 
-    return result.data;
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `${type}_report.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
