@@ -311,11 +311,74 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Categories (Simplified: Load all or paginated? Currently paginated)
+        // --- Categories Modal Logic ---
         const catListDiv = document.querySelector('#inventory-category-list');
-        if(catListDiv) {
-            loadPaginatedData(api.getAllInventoryCategories, render.renderInventoryCategoriesTable, catListDiv, null, 'inventoryCatPage');
-            // Category form logic... (omitted for brevity, similar pattern)
+        const manageCatBtn = document.querySelector('#create-inventory-category-btn');
+        const catModal = document.querySelector('#category-modal');
+        const closeCatModal = document.querySelector('.close-modal');
+        const catForm = document.querySelector('#inventory-category-form');
+
+        if(catListDiv && manageCatBtn) {
+            const catPagination = document.querySelector('.category-pagination');
+
+            // 1. Open Modal
+            manageCatBtn.addEventListener('click', () => {
+                catModal.style.display = 'flex';
+                // Load data when modal opens
+                loadPaginatedData(api.getAllInventoryCategories, render.renderInventoryCategoriesTable, catListDiv, catPagination, 'inventoryCatPage');
+            });
+
+            // 2. Close Modal
+            closeCatModal.addEventListener('click', () => {
+                catModal.style.display = 'none';
+                // Also refresh main inventory list in case categories changed (optional)
+                loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage');
+            });
+
+            // Close on click outside
+            window.addEventListener('click', (e) => {
+                if (e.target == catModal) {
+                    catModal.style.display = 'none';
+                    loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage');
+                }
+            });
+
+            // 3. Delete Category Logic
+            catListDiv.addEventListener('click', async (e) => {
+                if(e.target.classList.contains('delete-btn')) {
+                    const row = e.target.closest('tr');
+                    const id = row.dataset.id;
+                    const token = JSON.parse(localStorage.getItem('token'));
+                    
+                    if(confirm("Delete this category? Items in this category might lose their association.")) {
+                        try {
+                            await api.deleteInventoryCategory(id, token);
+                            loadPaginatedData(api.getAllInventoryCategories, render.renderInventoryCategoriesTable, catListDiv, catPagination, 'inventoryCatPage');
+                        } catch(err) {
+                            alert(err.message);
+                        }
+                    }
+                }
+            });
+
+            // 4. Create Category Logic
+            if(catForm) {
+                catForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = catForm.querySelector('#cat-name').value;
+                    const desc = catForm.querySelector('#cat-desc').value;
+                    const token = JSON.parse(localStorage.getItem('token'));
+
+                    try {
+                        await api.createInventoryCategory({ name, description: desc }, token);
+                        catForm.reset();
+                        alert("Category created.");
+                        loadPaginatedData(api.getAllInventoryCategories, render.renderInventoryCategoriesTable, catListDiv, catPagination, 'inventoryCatPage');
+                    } catch(err) {
+                        alert(err.message);
+                    }
+                });
+            }
         }
     }
 
@@ -327,7 +390,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginationDiv = document.querySelector('.pagination');
         loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage');
 
-        // Form Logic
+        // --- NEW: Event Listener for Edit/Delete ---
+        sellerListDiv.addEventListener('click', async (e) => {
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            const id = row.dataset.id;
+            const token = JSON.parse(localStorage.getItem('token'));
+
+            // DELETE ACTION
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm("Are you sure you want to delete this seller?")) {
+                    try {
+                        await api.deleteSeller(id, token);
+                        alert("Seller deleted successfully.");
+                        loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage');
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                }
+            }
+
+            // EDIT ACTION
+            if (e.target.classList.contains('edit-btn')) {
+                try {
+                    const seller = await api.getSeller(id, token);
+                    const sellerForm = document.querySelector('#seller-form');
+                    
+                    // Populate Form
+                    sellerForm.querySelector('#seller-id').value = seller.id;
+                    sellerForm.querySelector('#seller-name').value = seller.name;
+                    sellerForm.querySelector('#seller-category').value = seller.category;
+                    sellerForm.querySelector('#seller-platform').value = seller.platform_name;
+                    sellerForm.querySelector('#seller-contact').value = seller.contact_num;
+                    sellerForm.querySelector('#seller-email').value = seller.email;
+                    
+                    // Handle Image Preview
+                    const imgPreview = sellerForm.querySelector('.seller-image-preview');
+                    if (seller.image_path) {
+                        imgPreview.src = seller.image_path;
+                        imgPreview.style.display = 'block';
+                    } else {
+                        imgPreview.style.display = 'none';
+                    }
+
+                    // Update Title & Show
+                    document.querySelector('#form-title').innerText = "Edit Seller";
+                    sellerForm.style.display = "block";
+                    document.querySelector('#cancel-seller-btn').style.display = "block";
+                    
+                    // Scroll to form
+                    sellerForm.scrollIntoView({ behavior: 'smooth' });
+                } catch (err) {
+                    alert("Failed to fetch seller details: " + err.message);
+                }
+            }
+        });
+
+        // --- Form Logic ---
         const sellerForm = document.querySelector('#seller-form');
         const createSellerBtn = document.querySelector('#create-seller-btn');
         const cancelSellerBtn = document.querySelector('#cancel-seller-btn');
@@ -336,6 +456,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             createSellerBtn.addEventListener('click', () => {
                 sellerForm.reset();
                 sellerForm.querySelector('#seller-id').value = "";
+                
+                // Reset Image Preview
+                const imgPreview = sellerForm.querySelector('.seller-image-preview');
+                if(imgPreview) { 
+                    imgPreview.src = ""; 
+                    imgPreview.style.display = 'none'; 
+                }
+
+                document.querySelector('#form-title').innerText = "Add New Seller";
                 sellerForm.style.display = "block";
                 cancelSellerBtn.style.display = "block";
             });
@@ -365,12 +494,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     if(id) {
                         await api.updateSeller(id, formData, token);
-                        alert("Seller updated");
+                        alert("Seller updated successfully");
                     } else {
                         await api.createSeller(formData, token);
-                        alert("Seller created");
+                        alert("Seller created successfully");
                     }
                     sellerForm.style.display = "none";
+                    if(cancelSellerBtn) cancelSellerBtn.style.display = "none";
                     loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage');
                 } catch(err) {
                     alert(err.message);
@@ -387,31 +517,107 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginationDiv = document.querySelector('.pagination');
         loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage');
 
+        // --- NEW: Event Listener for Edit/Delete ---
+        rtsListDiv.addEventListener('click', async (e) => {
+            const row = e.target.closest('tr');
+            if(!row) return;
+
+            const id = row.dataset.id;
+            const token = JSON.parse(localStorage.getItem('token'));
+
+            // DELETE ACTION
+            if(e.target.classList.contains('delete-btn')) {
+                if(confirm("Are you sure you want to delete this record?")) {
+                    try {
+                        await api.deleteRTS(id, token);
+                        alert("Record deleted.");
+                        loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage');
+                    } catch(err) {
+                        alert(err.message);
+                    }
+                }
+            }
+
+            // EDIT ACTION
+            if(e.target.classList.contains('edit-btn')) {
+                const rtsForm = document.querySelector('#rts-form');
+                
+                try {
+                    // 1. Fetch the RTS Record
+                    const item = await api.getRTS(id, token);
+
+                    // 2. Fetch Sellers (Needed for the dropdown)
+                    const sellerRes = await api.getAllSellers(token, 1, true); 
+                    const select = rtsForm.querySelector('#rts-seller-id');
+                    select.innerHTML = '<option value="">Select Seller</option>';
+                    sellerRes.data.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.innerText = s.name;
+                        select.appendChild(opt);
+                    });
+
+                    // 3. Populate Form
+                    rtsForm.querySelector('#rts-id').value = item.id;
+                    rtsForm.querySelector('#rts-tracking').value = item.tracking_no;
+                    rtsForm.querySelector('#rts-seller-id').value = item.seller_id;
+                    rtsForm.querySelector('#rts-product').value = item.product_name;
+                    rtsForm.querySelector('#rts-customer').value = item.customer_name;
+                    rtsForm.querySelector('#rts-desc').value = item.description;
+
+                    // 4. UI Updates
+                    document.querySelector('#form-title').innerText = "Edit Returned Item";
+                    rtsForm.style.display = "block";
+                    const cancelBtn = document.querySelector('#cancel-rts-btn');
+                    if(cancelBtn) cancelBtn.style.display = "block";
+                    
+                    rtsForm.scrollIntoView({ behavior: 'smooth' });
+
+                } catch(err) {
+                    alert("Error loading details: " + err.message);
+                }
+            }
+        });
+
+        // --- Form Logic ---
         const createRtsBtn = document.querySelector('#create-rts-btn');
         const rtsForm = document.querySelector('#rts-form');
+        const cancelRtsBtn = document.querySelector('#cancel-rts-btn');
         
         if(createRtsBtn) {
             createRtsBtn.addEventListener('click', async () => {
                 rtsForm.reset();
                 rtsForm.querySelector('#rts-id').value = "";
-                rtsForm.style.display = "block";
-                document.querySelector('#cancel-rts-btn').style.display = "block";
-
+                document.querySelector('#form-title').innerText = "Log Returned Item";
+                
                 // Load Sellers for Dropdown
-                const token = JSON.parse(localStorage.getItem('token'));
-                const sellerRes = await api.getAllSellers(token, 1, true); // fetchAll = true
-                const select = rtsForm.querySelector('#rts-seller-id');
-                select.innerHTML = '<option value="">Select Seller</option>';
-                sellerRes.data.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.innerText = s.name;
-                    select.appendChild(opt);
-                });
+                try {
+                    const token = JSON.parse(localStorage.getItem('token'));
+                    const sellerRes = await api.getAllSellers(token, 1, true); // fetchAll = true
+                    const select = rtsForm.querySelector('#rts-seller-id');
+                    select.innerHTML = '<option value="">Select Seller</option>';
+                    sellerRes.data.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.innerText = s.name;
+                        select.appendChild(opt);
+                    });
+                    
+                    rtsForm.style.display = "block";
+                    if(cancelRtsBtn) cancelRtsBtn.style.display = "block";
+                } catch(err) {
+                    alert("Could not load sellers: " + err.message);
+                }
+            });
+        }
+
+        if(cancelRtsBtn) {
+            cancelRtsBtn.addEventListener('click', () => {
+                rtsForm.style.display = 'none';
+                cancelRtsBtn.style.display = 'none';
             });
         }
         
-        // RTS Form Submit
         if(rtsForm) {
             rtsForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -428,10 +634,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     if(id) {
                         await api.updateRTS(id, data, token);
+                        alert("Record updated successfully");
                     } else {
                         await api.createRTS(data, token);
+                        alert("Record logged successfully");
                     }
                     rtsForm.style.display = "none";
+                    if(cancelRtsBtn) cancelRtsBtn.style.display = "none";
                     loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage');
                 } catch(err) {
                     alert(err.message);
@@ -461,17 +670,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage');
-        
-        // Sales Form listeners (omitted for brevity, follow generic pattern)
-        const createSaleBtn = document.querySelector('#create-sale-btn');
-        if(createSaleBtn) {
-            const saleForm = document.querySelector('#sale-form');
-            createSaleBtn.addEventListener('click', ()=>{
-                saleForm.reset(); 
+
+        // --- NEW: Add Event Listener for Edit/Delete ---
+        salesListDiv.addEventListener('click', async (e) => {
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            const id = row.dataset.id;
+            const token = JSON.parse(localStorage.getItem('token'));
+
+            // DELETE ACTION
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm("Are you sure you want to delete this sales record?")) {
+                    try {
+                        await api.deleteSale(id, token);
+                        alert("Record deleted successfully.");
+                        loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage');
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                }
+            }
+
+            // EDIT ACTION
+            if (e.target.classList.contains('edit-btn')) {
+                const saleForm = document.querySelector('#sale-form');
+                
+                // Populate Form with data stored in the row dataset (from render.js)
+                saleForm.querySelector('#sale-id').value = id;
+                saleForm.querySelector('#sale-start-date').value = row.dataset.startDate;
+                saleForm.querySelector('#sale-end-date').value = row.dataset.endDate;
+                saleForm.querySelector('#sale-amount').value = row.dataset.amount;
+                saleForm.querySelector('#sale-notes').value = row.dataset.notes;
+
+                // Update Title
+                const formTitle = document.querySelector('#form-title');
+                if(formTitle) formTitle.innerText = "Edit Sales Record";
+
+                // Show Form
                 saleForm.style.display = 'block';
-                document.querySelector('#cancel-sale-btn').style.display = 'block';
+                const cancelBtn = document.querySelector('#cancel-sale-btn');
+                if(cancelBtn) cancelBtn.style.display = 'block';
+
+                // Scroll to form (UX)
+                saleForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // --- Form Logic ---
+        const createSaleBtn = document.querySelector('#create-sale-btn');
+        const saleForm = document.querySelector('#sale-form');
+        const cancelSaleBtn = document.querySelector('#cancel-sale-btn');
+
+        if(createSaleBtn) {
+            createSaleBtn.addEventListener('click', () => {
+                saleForm.reset(); 
+                saleForm.querySelector('#sale-id').value = ""; // Clear ID for new creation
+                const formTitle = document.querySelector('#form-title');
+                if(formTitle) formTitle.innerText = "Add New Sales Record";
+                
+                saleForm.style.display = 'block';
+                if(cancelSaleBtn) cancelSaleBtn.style.display = 'block';
             });
+        }
+
+        if(cancelSaleBtn) {
+            cancelSaleBtn.addEventListener('click', () => {
+                saleForm.style.display = 'none';
+                cancelSaleBtn.style.display = 'none';
+            });
+        }
             
+        if(saleForm) {
             saleForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = saleForm.querySelector('#sale-id').value;
@@ -483,11 +753,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
                 const token = JSON.parse(localStorage.getItem('token'));
                 try {
-                    if(id) await api.updateSale(id, data, token);
-                    else await api.createSale(data, token);
+                    if(id) {
+                        await api.updateSale(id, data, token);
+                        alert("Sales record updated successfully");
+                    } else {
+                        await api.createSale(data, token);
+                        alert("Sales record created successfully");
+                    }
                     saleForm.style.display = 'none';
+                    if(cancelSaleBtn) cancelSaleBtn.style.display = 'none';
                     loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage');
-                } catch(err){ alert(err.message); }
+                } catch(err){ 
+                    alert(err.message); 
+                }
             });
         }
     }
@@ -497,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ============================================================
     const documentListDiv = document.querySelector('#document-list');
     if (documentListDiv) {
-        // Need to find or create pagination div as documents.html might not have it
+        // Ensure pagination exists
         let paginationDiv = document.querySelector('.pagination');
         if(!paginationDiv) {
             paginationDiv = document.createElement('div');
@@ -507,16 +785,87 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage');
         
-        // Document Form...
+        // --- NEW: Event Listener for Edit/Delete ---
+        documentListDiv.addEventListener('click', async (e) => {
+            const row = e.target.closest('tr');
+            if(!row) return;
+            
+            const id = row.dataset.id;
+            const token = JSON.parse(localStorage.getItem('token'));
+
+            // DELETE ACTION
+            if(e.target.classList.contains('delete-btn')) {
+                if(confirm("Are you sure you want to delete this document?")) {
+                    try {
+                        await api.deleteDocument(id, token);
+                        alert("Document deleted.");
+                        loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage');
+                    } catch(err) {
+                        alert(err.message);
+                    }
+                }
+            }
+
+            // EDIT ACTION (Targeting .real-edit-btn based on render.js or .edit-btn)
+            if(e.target.classList.contains('real-edit-btn') || e.target.classList.contains('edit-btn')) {
+                const docForm = document.querySelector('#document-form');
+                
+                // Get data from table cells (Order: Title, Category, Expiry)
+                const cells = row.querySelectorAll('td');
+                const currentTitle = cells[0].innerText;
+                const currentCategory = cells[1].innerText;
+                const currentExpiry = cells[2].innerText;
+
+                // Populate Form
+                docForm.querySelector('#document-id').value = id;
+                docForm.querySelector('#document-title').value = currentTitle;
+                docForm.querySelector('#document-category').value = currentCategory;
+                docForm.querySelector('#document-expiry').value = currentExpiry;
+
+                // UI Changes for Edit Mode
+                document.querySelector('#form-title').innerText = "Edit Document Details";
+                
+                // Hide File Input (Backend doesn't support file update yet)
+                const fileInputContainer = docForm.querySelector('#document-file').parentNode;
+                if(fileInputContainer) fileInputContainer.style.display = 'none';
+
+                // Show Form
+                docForm.style.display = 'block';
+                const cancelBtn = document.querySelector('#cancel-document-btn');
+                if(cancelBtn) cancelBtn.style.display = 'block';
+                
+                docForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // --- Form Logic ---
         const createDocBtn = document.querySelector('#create-document-btn');
+        const docForm = document.querySelector('#document-form');
+        const cancelDocBtn = document.querySelector('#cancel-document-btn');
+
         if(createDocBtn) {
-            const docForm = document.querySelector('#document-form');
             createDocBtn.addEventListener('click', ()=>{
                 docForm.reset();
+                docForm.querySelector('#document-id').value = ""; // Clear ID
+                
+                // UI Changes for Create Mode
+                document.querySelector('#form-title').innerText = "Upload New Document";
+                const fileInputContainer = docForm.querySelector('#document-file').parentNode;
+                if(fileInputContainer) fileInputContainer.style.display = 'block'; // Show File Input
+
                 docForm.style.display = 'block';
-                document.querySelector('#cancel-document-btn').style.display = 'block';
+                if(cancelDocBtn) cancelDocBtn.style.display = 'block';
             });
+        }
+
+        if(cancelDocBtn) {
+            cancelDocBtn.addEventListener('click', () => {
+                docForm.style.display = 'none';
+                cancelDocBtn.style.display = 'none';
+            });
+        }
             
+        if(docForm) {
             docForm.addEventListener('submit', async (e)=>{
                 e.preventDefault();
                 const id = docForm.querySelector('#document-id').value;
@@ -524,23 +873,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 try {
                     if(id) {
+                        // UPDATE (JSON)
                         const data = {
                             title: docForm.querySelector('#document-title').value,
                             category: docForm.querySelector('#document-category').value,
                             expiry_date: docForm.querySelector('#document-expiry').value
                         };
                         await api.updateDocument(id, data, token);
+                        alert("Document updated successfully.");
                     } else {
+                        // CREATE (FormData)
                         const formData = new FormData();
                         formData.append('title', docForm.querySelector('#document-title').value);
                         formData.append('category', docForm.querySelector('#document-category').value);
                         formData.append('expiry_date', docForm.querySelector('#document-expiry').value);
-                        formData.append('document', docForm.querySelector('#document-file').files[0]);
+                        
+                        const fileInput = docForm.querySelector('#document-file');
+                        if(fileInput.files[0]) {
+                            formData.append('document', fileInput.files[0]);
+                        } else {
+                            throw new Error("File is required for new documents.");
+                        }
+
                         await api.createDocument(formData, token);
+                        alert("Document uploaded successfully.");
                     }
                     docForm.style.display = 'none';
+                    if(cancelDocBtn) cancelDocBtn.style.display = 'none';
                     loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage');
-                } catch(err){ alert(err.message); }
+                } catch(err){ 
+                    alert(err.message); 
+                }
             });
         }
     }

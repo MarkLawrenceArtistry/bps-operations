@@ -84,34 +84,6 @@
             </div>
 
             <div class="main">
-                <!-- Category Section (Hidden by default or managed by JS) -->
-                <div class="inventory-category-wrapper main-content-layout">
-                    <div class="table-section">
-                        <div id="inventory-category-list"></div>
-                    </div>
-                    
-                    <div class="inventory-category-form-wrapper">
-                        <div class="form-wrapper">
-                            <form id="inventory-category-form">
-                                <h3 id="form-title">Create New Inventory Category</h3>
-                                <input type="text" id="inventory-category-id" title="Category ID">
-                                <div class="form-item">
-                                    <label>Name</label>
-                                    <input type="text" id="inventory-category-name" placeholder="Enter inventory category name..">
-                                </div>
-                                <div class="form-item">
-                                    <label>Description</label>
-                                    <textarea cols="30" rows="6" id="inventory-category-description" placeholder="Enter inventory category description.."></textarea>
-                                </div>
-                                <div class="form-actions">
-                                    <button type="submit">Submit</button>
-                                    <button type="button" id="cancel-inventory-category-btn">Cancel</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Inventory Section -->
                 <div class="inventory-wrapper">
                     <div class="inventory-actions">
@@ -172,6 +144,44 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORY MODAL -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Categories</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-split">
+                    <!-- Left: List -->
+                    <div class="modal-list-section">
+                        <div id="inventory-category-list"></div>
+                        <!-- Pagination for categories -->
+                        <div class="category-pagination pagination"></div> 
+                    </div>
+
+                    <!-- Right: Form -->
+                    <div class="modal-form-section">
+                        <form id="inventory-category-form">
+                            <h3>Add New Category</h3>
+                            <div class="form-item">
+                                <label>Name</label>
+                                <input type="text" id="cat-name" placeholder="Category Name" required>
+                            </div>
+                            <div class="form-item">
+                                <label>Description</label>
+                                <textarea id="cat-desc" rows="3" placeholder="Description"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit">Save</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
