@@ -21,7 +21,7 @@
 }
 
 /* Global Utilities */
-.hidden-form { display: none !important; }
+.hidden-form { display: none; }
 .login-logo-white {
     filter: brightness(0) invert(1);
     margin-bottom: 2rem;
