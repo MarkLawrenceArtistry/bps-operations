@@ -122,6 +122,30 @@ export async function checkSession(token) {
     return result.data;
 }
 
+// (AUTH) Forgot Password - Get Question
+export async function getSecurityQuestion(email) {
+    const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data; // Returns question string
+}
+
+// (AUTH) Reset Password
+export async function resetPassword(data) {
+    const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
+
 // -----------------------------------------------------------
 
 // (INVENTORY) Get All Inventory Categories
@@ -160,6 +184,32 @@ export async function createInventoryCategory(data, token) {
 // (INVENTORY) Delete Inventory Category
 export async function deleteInventoryCategory(id, token) {
     const response = await fetch(`/api/inventory/category/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
+
+export async function createInventory(formData, token) {
+    const response = await fetch('/api/inventory/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
+
+export async function deleteInventory(id, token) {
+    const response = await fetch(`/api/inventory/${id}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

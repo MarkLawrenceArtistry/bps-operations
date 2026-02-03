@@ -45,7 +45,6 @@ async function loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv
         }
     }
 }
-
 function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -54,7 +53,6 @@ function debounce(func, wait) {
         timeout = setTimeout(() => func.apply(context, args), wait);
     };
 }
-
 // --- HELPER: Role Based UI ---
 function applyRoleBasedUI() {
     if (!currentAccount) return;
@@ -63,7 +61,6 @@ function applyRoleBasedUI() {
         adminLinks.forEach(link => link.style.display = 'none');
     }
 }
-
 // --- HELPER: Check Session ---
 async function checkSession() {
     try {
@@ -88,6 +85,66 @@ async function checkSession() {
         }
     }
 }
+function setupMultiDelete(listDivId, btnId, deleteApiCallback, refreshCallback) {
+    const listDiv = document.querySelector(listDivId);
+    const bulkBtn = document.querySelector(btnId);
+    const countSpan = bulkBtn ? bulkBtn.querySelector('span') : null;
+
+    if (!listDiv || !bulkBtn) return;
+
+    // Helper to get selected IDs
+    const getSelectedIds = () => {
+        return Array.from(listDiv.querySelectorAll('.row-select:checked')).map(cb => cb.value);
+    };
+
+    // Update Button State
+    const updateBtn = () => {
+        const count = listDiv.querySelectorAll('.row-select:checked').length;
+        if (count > 0) {
+            bulkBtn.style.display = 'flex'; // or block/inline-flex
+            if(countSpan) countSpan.innerText = count;
+        } else {
+            bulkBtn.style.display = 'none';
+        }
+    };
+
+    // Event Delegation for Checkboxes
+    listDiv.addEventListener('change', (e) => {
+        if (e.target.classList.contains('select-all')) {
+            const checkboxes = listDiv.querySelectorAll('.row-select');
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateBtn();
+        } else if (e.target.classList.contains('row-select')) {
+            updateBtn();
+            // Uncheck "select all" if one is unchecked
+            if(!e.target.checked) {
+                const selectAll = listDiv.querySelector('.select-all');
+                if(selectAll) selectAll.checked = false;
+            }
+        }
+    });
+
+    // Handle Delete Click
+    bulkBtn.addEventListener('click', async () => {
+        const ids = getSelectedIds();
+        if (ids.length === 0) return;
+
+        if (confirm(`Are you sure you want to delete ${ids.length} items? This cannot be undone.`)) {
+            const token = JSON.parse(localStorage.getItem('token'));
+            try {
+                // Execute deletes in parallel
+                await Promise.all(ids.map(id => deleteApiCallback(id, token)));
+                
+                alert("Selected items deleted.");
+                bulkBtn.style.display = 'none';
+                refreshCallback(); // Reload table
+            } catch (err) {
+                alert("Some items could not be deleted: " + err.message);
+                refreshCallback();
+            }
+        }
+    });
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     
@@ -95,6 +152,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!window.location.pathname.endsWith('index.html')) {
         await checkSession();
     }
+
+    setupMultiDelete(
+        '#inventory-list', 
+        '#bulk-delete-btn', 
+        api.deleteInventory, 
+        () => loadPaginatedData(api.getAllInventory, render.renderInventoryTable, document.querySelector('#inventory-list'), document.querySelector('.pagination'), 'inventoryPage', 'inventorySearch')
+    );
 
     // ============================================================
     // AUTHENTICATION (Login / Logout)
@@ -124,6 +188,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('token');
                 location.href = 'index.html';
+            }
+        });
+    }
+
+    // --- FORGOT PASSWORD LOGIC (Index Page) ---
+    const fpLink = document.querySelector('.login-options a');
+    const fpModal = document.querySelector('#forgot-password-modal');
+    
+    if (fpLink && fpModal) {
+        const step1 = document.querySelector('#fp-step-1');
+        const step2 = document.querySelector('#fp-step-2');
+        const closeBtn = document.querySelector('#close-fp-modal');
+
+        fpLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            fpModal.style.display = 'flex';
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+        });
+
+        closeBtn.addEventListener('click', () => fpModal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if(e.target == fpModal) fpModal.style.display = 'none';
+        });
+
+        // Step 1: Check Email
+        step1.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.querySelector('#fp-email').value;
+            try {
+                const question = await api.getSecurityQuestion(email);
+                document.querySelector('#fp-question-display').innerText = question;
+                step1.style.display = 'none';
+                step2.style.display = 'block';
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        // Step 2: Reset
+        step2.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.querySelector('#fp-email').value;
+            const answer = document.querySelector('#fp-answer').value;
+            const newPassword = document.querySelector('#fp-new-pass').value;
+
+            try {
+                await api.resetPassword({ email, answer, newPassword });
+                alert("Password reset successfully! You can now log in.");
+                fpModal.style.display = 'none';
+                // Clear forms
+                step1.reset();
+                step2.reset();
+            } catch (err) {
+                alert(err.message);
             }
         });
     }
@@ -164,7 +283,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     accountForm.querySelector('#account-username').value = acc.username;
                     accountForm.querySelector('#account-email').value = acc.email;
                     accountForm.querySelector('#account-role').value = acc.role_id;
-                    accountForm.querySelector('#account-password').value = ""; // Don't show hash
+                    accountForm.querySelector('#account-password').value = "";
+                    accountForm.querySelector('#account-question').value = acc.security_question || "";
+                    accountForm.querySelector('#account-answer').value = "";
                     
                     document.querySelector('#form-title').innerText = "Update Account";
                     accountForm.style.display = "block";
@@ -220,7 +341,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     username: accountForm.querySelector('#account-username').value.trim(),
                     email: accountForm.querySelector('#account-email').value.trim(),
                     role_id: accountForm.querySelector('#account-role').value,
-                    password: accountForm.querySelector('#account-password').value.trim()
+                    password: accountForm.querySelector('#account-password').value.trim(),
+                    security_question: accountForm.querySelector('#account-question').value,
+                    security_answer: accountForm.querySelector('#account-answer').value.trim()
                 };
                 const id = accountForm.querySelector('#account-id').value;
                 const token = JSON.parse(localStorage.getItem('token'));
@@ -314,18 +437,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         if(inventoryForm) {
+            inventoryForm.querySelector('#inventory-staff-id').value = currentAccount.id;
             inventoryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                console.log(currentAccount);
+                
                 const formData = new FormData();
                 formData.append('name', inventoryForm.querySelector('#inventory-name').value);
                 formData.append('category_id', inventoryForm.querySelector('#inventory-category').value);
                 formData.append('quantity', inventoryForm.querySelector('#inventory-quantity').value);
                 formData.append('min_stock_level', inventoryForm.querySelector('#inventory-minstock').value);
+                formData.append('staff_id', inventoryForm.querySelector('#inventory-staff-id').value);
                 
                 const fileInput = inventoryForm.querySelector('#inventory-image');
                 if(fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
                 const id = inventoryForm.querySelector('#inventory-id').value;
+                
+
                 const token = JSON.parse(localStorage.getItem('token'));
 
                 try {

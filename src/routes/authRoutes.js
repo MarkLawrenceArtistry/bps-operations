@@ -15,4 +15,7 @@ router.put('/disable/:id', verifyToken, isAdmin, authController.disableUser);
 router.put('/enable/:id', verifyToken, isAdmin, authController.enableUser);
 router.delete('/:id', verifyToken, isAdmin, authController.deleteUser);
 
+router.post('/forgot-password', authController.getSecurityQuestion);
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

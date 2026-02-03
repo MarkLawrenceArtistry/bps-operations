@@ -168,6 +168,8 @@ export function renderInventoryTable(data, container) {
     table.innerHTML = `
         <thead>
             <tr>
+                <!-- ADDED: Select All Checkbox -->
+                <th style="width: 40px;"><input type="checkbox" class="select-all"></th>
                 <th>Image</th>
                 <th>Name</th>
                 <th>Category</th>
@@ -182,7 +184,7 @@ export function renderInventoryTable(data, container) {
     const tbody = table.querySelector('tbody');
 
     if (!data || data.length === 0) {
-        renderEmptyState(tbody, 7, "No inventory items found.");
+        renderEmptyState(tbody, 8, "No inventory items found."); // Update colspan to 8
     } else {
         data.forEach(element => {
             const row = document.createElement('tr');
@@ -196,6 +198,7 @@ export function renderInventoryTable(data, container) {
             const statusText = element.quantity <= element.min_stock_level ? 'Low Stock' : 'Good';
 
             row.innerHTML = `
+                <td><input type="checkbox" class="row-select" value="${element.id}"></td>
                 <td>${imgDisplay}</td>
                 <td><strong>${element.name}</strong></td>
                 <td>${element.category_name || 'Uncategorized'}</td>

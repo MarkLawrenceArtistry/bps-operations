@@ -61,6 +61,22 @@ const initDB = () => {
             }
         })
 
+        const addSecurityCols = () => {
+        const columnsToAdd = [
+            "ALTER TABLE users ADD COLUMN security_question TEXT",
+            "ALTER TABLE users ADD COLUMN security_answer_hash TEXT"
+        ];
+        
+        columnsToAdd.forEach(query => {
+                db.run(query, (err) => {
+                    // Ignore error if column already exists
+                    if (!err) console.log("Added security column to users table.");
+                });
+            });
+        };
+        // Run migration with a small delay to ensure table exists
+        setTimeout(addSecurityCols, 1000);
+
         // 3. Inventory Categories Management
         db.run(`
                 CREATE TABLE IF NOT EXISTS inventory_categories (

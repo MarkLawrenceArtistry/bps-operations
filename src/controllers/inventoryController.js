@@ -118,7 +118,7 @@ const createInventory = async (req, res) => {
         const { name, category_id, quantity, min_stock_level, staff_id } = req.body;
 
         if (!name || !category_id || !quantity || !min_stock_level) {
-            return res.status(400).json({ success: false, data: "All fields except image are required." });
+            return res.status(400).json({ success: false, data: `All fields except image are required.` });
         }
 
         const imageUrl = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null;

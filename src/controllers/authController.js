@@ -94,26 +94,29 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const { username, email, password, role_id } = req.body;
+        const { username, email, password, role_id, security_question, security_answer } = req.body;
 
         if (!username || !email || !password || !role_id) {
-            return res.status(400).json({ success: false, data: "All fields are required." });
-        }
-        if (password.length < 8) {
-            return res.status(400).json({ success: false, data: "Password must be at least 8 characters." });
+            return res.status(400).json({ success: false, data: "Fields required." });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
+        
+        // Hash the answer if provided
+        let answerHash = null;
+        if (security_answer) {
+            answerHash = await bcrypt.hash(security_answer, salt);
+        }
 
         const result = await run(`
-            INSERT INTO users (username, email, password_hash, role_id, is_active)
-            VALUES (?, ?, ?, ?, 1)
-        `, [username, email, hash, role_id]);
+            INSERT INTO users (username, email, password_hash, role_id, is_active, security_question, security_answer_hash)
+            VALUES (?, ?, ?, ?, 1, ?, ?)
+        `, [username, email, hash, role_id, security_question, answerHash]);
 
         await logAudit(req.user.id, 'CREATE', 'users', result.lastID, `Created user ${username}`, req.ip);
 
-        res.status(201).json({ success: true, data: "User created successfully", id: result.lastID });
+        res.status(201).json({ success: true, data: "User created.", id: result.lastID });
     } catch (err) {
         res.status(500).json({ success: false, data: `Error: ${err.message}` });
     }
@@ -122,15 +125,24 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        let { username, password, email, role_id, is_active } = req.body;
+        let { username, password, email, role_id, is_active, security_question, security_answer } = req.body;
 
+        // Prepare Password Hash
+        let passwordHash = null;
         if (password) {
             const salt = await bcrypt.genSalt(10);
-            password = await bcrypt.hash(password, salt);
-        } else {
-            password = null; // Let COALESCE handle it
+            passwordHash = await bcrypt.hash(password, salt);
         }
 
+        // Prepare Answer Hash
+        let answerHash = null;
+        if (security_answer) {
+            const salt = await bcrypt.genSalt(10);
+            answerHash = await bcrypt.hash(security_answer, salt);
+        }
+
+        // We use COALESCE in SQL, but since we are constructing a dynamic update, simpler SQL is better here
+        // However, to keep it consistent with previous style:
         await run(`
             UPDATE users
             SET
@@ -138,13 +150,15 @@ const updateUser = async (req, res) => {
                 password_hash = COALESCE(?, password_hash),
                 email = COALESCE(?, email),
                 role_id = COALESCE(?, role_id),
-                is_active = COALESCE(?, is_active)
+                is_active = COALESCE(?, is_active),
+                security_question = COALESCE(?, security_question),
+                security_answer_hash = COALESCE(?, security_answer_hash)
             WHERE id = ?
-        `, [username, password, email, role_id, is_active, id]);
+        `, [username, passwordHash, email, role_id, is_active, security_question, answerHash, id]);
 
         await logAudit(req.user.id, 'UPDATE', 'users', id, `Updated user ID:${id}`, req.ip);
 
-        res.status(200).json({ success: true, data: "User updated successfully!" });
+        res.status(200).json({ success: true, data: "User updated." });
     } catch (err) {
         res.status(500).json({ success: false, data: `Error: ${err.message}` });
     }
@@ -198,4 +212,49 @@ const checkSession = (req, res) => {
     res.status(200).json({ success: true, data: { user: req.user } });
 };
 
-module.exports = { login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser, enableUser, checkSession };
+// NEW: Get Security Question by Email (Public)
+const getSecurityQuestion = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await get(`SELECT security_question FROM users WHERE email = ?`, [email]);
+        
+        if (!user) return res.status(404).json({ success: false, data: "Email not found." });
+        if (!user.security_question) return res.status(400).json({ success: false, data: "No security question set for this account." });
+
+        res.status(200).json({ success: true, data: user.security_question });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+// NEW: Reset Password (Public)
+const resetPassword = async (req, res) => {
+    try {
+        const { email, answer, newPassword } = req.body;
+        
+        const user = await get(`SELECT id, security_answer_hash FROM users WHERE email = ?`, [email]);
+        if (!user) return res.status(404).json({ success: false, data: "User not found." });
+
+        const isMatch = await bcrypt.compare(answer, user.security_answer_hash);
+        if (!isMatch) return res.status(401).json({ success: false, data: "Incorrect answer." });
+
+        if (newPassword.length < 8) return res.status(400).json({ success: false, data: "Password too short." });
+
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(newPassword, salt);
+
+        await run(`UPDATE users SET password_hash = ? WHERE id = ?`, [hash, user.id]);
+        
+        // Log this action (System action, so user_id is the user themselves)
+        await logAudit(user.id, 'UPDATE', 'users', user.id, 'Password reset via security question', req.ip);
+
+        res.status(200).json({ success: true, data: "Password reset successful." });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+module.exports = { 
+    login, getAllUsers, createUser, updateUser, deleteUser, getUser, disableUser, enableUser, checkSession, 
+    getSecurityQuestion, resetPassword 
+}
