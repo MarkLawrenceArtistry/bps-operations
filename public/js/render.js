@@ -514,3 +514,98 @@ export function renderLowStockWidget(data, container) {
         });
     }
 }
+
+
+// 10. REPORTS
+export function renderReportChart(type, chartData) {
+    const ctx = document.getElementById('reportChart');
+    const noChartMsg = document.getElementById('no-chart-msg');
+
+    // Reset Chart
+    if (reportChartInstance) {
+        reportChartInstance.destroy();
+    }
+
+    if (!chartData || type === 'inventory') {
+        ctx.style.display = 'none';
+        noChartMsg.style.display = 'block';
+        return;
+    }
+
+    ctx.style.display = 'block';
+    noChartMsg.style.display = 'none';
+
+    reportChartInstance = new Chart(ctx, {
+        type: 'bar', // Wireframe suggests a chart
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Total Sales (PHP)',
+                data: chartData.data,
+                backgroundColor: '#ff9831', // Orange brand color
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+export function renderReportTable(type, rows) {
+    const thead = document.querySelector('#preview-table thead');
+    const tbody = document.querySelector('#preview-table tbody');
+    tbody.innerHTML = '';
+    thead.innerHTML = '';
+
+    if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem;">No data found for this range.</td></tr>`;
+        return;
+    }
+
+    if (type === 'sales') {
+        thead.innerHTML = `
+            <tr>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Amount</th>
+                <th>Notes</th>
+            </tr>
+        `;
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.week_start_date}</td>
+                <td>${row.week_end_date}</td>
+                <td><strong>₱${row.total_amount.toLocaleString()}</strong></td>
+                <td style="font-size:0.85rem; color:#666;">${row.notes || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } else if (type === 'inventory') {
+        thead.innerHTML = `
+            <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Status</th>
+            </tr>
+        `;
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            const statusClass = row.quantity <= row.min_stock_level ? 'critical' : 'active';
+            const statusText = row.quantity <= row.min_stock_level ? 'Low' : 'OK';
+            tr.innerHTML = `
+                <td><strong>${row.name}</strong></td>
+                <td>${row.category || 'N/A'}</td>
+                <td>${row.quantity}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+}

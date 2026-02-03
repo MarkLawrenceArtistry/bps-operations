@@ -5,60 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - BPS RMS</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js is required -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="reports-page">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" title="Toggle Navigation">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox">
     <div class="content">
         <label for="nav-toggle" class="sidebar-overlay"></label>
-        <!-- Sidebar (Copy standard sidebar from dashboard.html here and set Reports active) -->
+        
+        <!-- SIDEBAR (Same as before) -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <img src="logo/Bicodo Postal Services Logo.png" alt="BPS Logo">
-                <h2>BPS System</h2>
+                <h2>Welcome Back!</h2>
+                <p>BPS Operations System</p>
             </div>
-             <div class="sidebar-content">
-                <div class="nav-label">Overview</div>
-                <a class="nav-item" href="dashboard.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png" alt="dashboard">
-                    <span>Dashboard</span>
-                </a>
-                <a class="nav-item" href="audit-log.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png" alt="audit-log">
-                    <span>Audit Log</span>
-                </a>
-                <a class="nav-item active" href="reports.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/reports_icon.png" alt="reports">
-                    <span>Reports</span>
-                </a>
-
+            <div class="sidebar-content">
+                <!-- Navigation items... -->
+                <a class="nav-item" href="dashboard.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png"><span>Dashboard</span></a>
+                <a class="nav-item" href="audit-log.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/audit_log_icon.png"><span>Audit Log</span></a>
+                <a class="nav-item active" href="reports.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/reports_icon.png"><span>Reports</span></a>
                 <div class="nav-label">Staff</div>
-                <a class="nav-item" href="inventory.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png" alt="inventory">
-                    <span>Inventory</span>
-                </a>
-                <a class="nav-item" href="sellers.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png" alt="sellers">
-                    <span>Sellers</span>
-                </a>
-
-                <a class="nav-item" href="rts.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png" alt="rts">
-                    <span>Returned-to-Seller</span>
-                </a>
-                <a class="nav-item" href="documents.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png" alt="documents">
-                    <span>Documents</span>
-                </a>
-
+                <a class="nav-item" href="inventory.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/inventory_icon.png"><span>Inventory</span></a>
+                <a class="nav-item" href="sellers.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/sellers_icon.png"><span>Sellers</span></a>
+                <a class="nav-item" href="rts.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/returned_icon.png"><span>Returned</span></a>
+                <a class="nav-item" href="documents.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/document_icon.png"><span>Documents</span></a>
                 <div class="nav-label">Admin</div>
-                <a class="nav-item admin-nav" href="sales.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png" alt="sales">
-                    <span>Sales</span>
-                </a>
-                <a class="nav-item admin-nav" href="accounts.html">
-                    <img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png" alt="accounts">
-                    <span>Accounts</span>
-                </a>
+                <a class="nav-item admin-nav" href="sales.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/sales_icon.png"><span>Sales</span></a>
+                <a class="nav-item admin-nav" href="accounts.html"><img src="Icons/Sidebar-Navigation Bar (All Pages)/accounts_icon.png"><span>Accounts</span></a>
+            </div>
+            <div class="sidebar-footer">
+                <button id="logout-button"><img src="Icons/Sidebar-Navigation Bar (All Pages)/sign-out.png"><span>Log out</span></button>
             </div>
         </div>
 
@@ -66,48 +43,98 @@
             <div class="main-header">
                 <div class="header-left">
                     <label for="nav-toggle" class="hamburger">
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span>
                     </label>
-                    <h1>Financial Reports</h1>
+                    <h1>Reports</h1>
                 </div>
-                <div class="user-info"><h4>Admin</h4></div>
+                <div class="user-info"><h4>Admin</h4><p>Role</p></div>
             </div>
 
             <div class="main">
-                <div class="overview-grid">
-                    <!-- Inventory Report Card -->
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <h3>Inventory Status</h3>
-                            <p>Generate a PDF list of all current stock levels, categories, and low stock warnings.</p>
-                            <br>
-                            <button id="btn-gen-inventory" class="btn-orange">Download Inventory Report</button>
+                <!-- WIREFRAME LAYOUT: Split Screen -->
+                <div class="main-content-layout">
+                    
+                    <!-- LEFT: PREVIEW SECTION -->
+                    <div class="table-section" style="flex: 2;">
+                        <div class="card-box preview-card">
+                            <h3 style="margin-bottom: 1rem;">Preview</h3>
+                            <h2 id="preview-title" style="margin-bottom: 1.5rem; color: var(--primary);">Sales Overview</h2>
+                            
+                            <!-- Chart Area -->
+                            <div class="chart-container" style="height: 300px; margin-bottom: 2rem;">
+                                <canvas id="reportChart"></canvas>
+                                <div id="no-chart-msg" style="display:none; text-align:center; padding-top:100px; color:#999;">Chart not available for this category</div>
+                            </div>
+
+                            <!-- Table Area -->
+                            <h3 style="margin-bottom: 1rem;">Data Summary</h3>
+                            <div class="table-card">
+                                <table class="table" id="preview-table">
+                                    <thead>
+                                        <!-- Headers injected by JS -->
+                                    </thead>
+                                    <tbody>
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Sales Report Card -->
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <h3>Sales Performance</h3>
-                            <p>Generate revenue reports based on weekly sales logs.</p>
-                            <br>
+                    <!-- RIGHT: REPORT BUILDER SECTION -->
+                    <div class="form-wrapper" style="width: 350px; display: block;"> <!-- Force display block -->
+                        <div class="card-box builder-card">
+                            <h2 style="margin-bottom: 1.5rem;">Report Builder</h2>
+                            
                             <div class="form-item">
-                                <label for="report-start">Start Date</label>
-                                <input type="date" id="report-start" title="Select start date for the report">
+                                <label>Report Category</label>
+                                <select id="rep-category">
+                                    <option value="sales">Sales Performance</option>
+                                    <option value="inventory">Inventory Status</option>
+                                </select>
                             </div>
+
+                            <div class="form-item date-range-group">
+                                <label>Date Range</label>
+                                <input type="date" id="rep-start" style="margin-bottom: 0.5rem;">
+                                <input type="date" id="rep-end">
+                                <small style="color:#666; display:block; margin-top:5px;">Leave blank for all time</small>
+                            </div>
+
                             <div class="form-item">
-                                <label for="report-end">End Date</label>
-                                <input type="date" id="report-end" title="Select end date for the report">
+                                <label>Format</label>
+                                <select disabled style="background-color: #f3f4f6; cursor: not-allowed;">
+                                    <option>PDF Document</option>
+                                </select>
                             </div>
-                            <button id="btn-gen-sales" class="btn-orange">Download Sales Report</button>
+
+                            <div class="form-actions" style="flex-direction: column;">
+                                <button id="btn-update-preview" class="btn-orange" style="background-color: var(--primary);">Update Preview</button>
+                                <button id="btn-download" class="btn-orange">Download Report</button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Additional CSS for Reports Page Specifics -->
+    <style>
+        .card-box {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid #f3f4f6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        /* Mobile adjustment */
+        @media (max-width: 1024px) {
+            .form-wrapper { width: 100% !important; }
+        }
+    </style>
+
     <script src="js/main.js" type="module"></script>
 </body>
 </html>

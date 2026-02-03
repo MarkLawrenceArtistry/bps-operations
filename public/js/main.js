@@ -1261,5 +1261,78 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch(err) { alert(err.message); }
         });
     }
+    
+
+    // Identify current page
+    const isReportsPage = document.body.classList.contains('reports-page');
+    if (isReportsPage) {
+        const token = JSON.parse(localStorage.getItem('token'));
+        initReportsPage(token);
+    }
+
+    async function initReportsPage(token) {
+        const categorySelect = document.getElementById('rep-category');
+        const startInput = document.getElementById('rep-start');
+        const endInput = document.getElementById('rep-end');
+        const btnUpdate = document.getElementById('btn-update-preview');
+        const btnDownload = document.getElementById('btn-download');
+        const previewTitle = document.getElementById('preview-title');
+        const dateRangeGroup = document.querySelector('.date-range-group');
+
+        // 1. Load Initial Data (Default: Sales, This Month)
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = today.toISOString().split('T')[0];
+        
+        startInput.value = firstDay;
+        endInput.value = lastDay;
+
+        // Helper to fetch and render
+        const refreshPreview = async () => {
+            try {
+                const type = categorySelect.value;
+                const start = startInput.value;
+                const end = endInput.value;
+
+                // Update UI Title
+                previewTitle.textContent = type === 'sales' 
+                    ? `Sales from ${start || 'Start'} to ${end || 'Now'}` 
+                    : 'Inventory Snapshot';
+
+                // Hide/Show Date inputs based on category (Inventory doesn't strictly need dates)
+                if(type === 'inventory') {
+                    dateRangeGroup.style.opacity = '0.5';
+                    dateRangeGroup.style.pointerEvents = 'none';
+                } else {
+                    dateRangeGroup.style.opacity = '1';
+                    dateRangeGroup.style.pointerEvents = 'auto';
+                }
+
+                const data = await api.getReportPreview(token, type, start, end);
+                render.renderReportChart(type, data.chart);
+                render.renderReportTable(type, data.rows);
+
+            } catch (error) {
+                console.error(error);
+                alert("Failed to load report preview.");
+            }
+        };
+
+        // 2. Event Listeners
+        btnUpdate.addEventListener('click', refreshPreview);
+        categorySelect.addEventListener('change', refreshPreview);
+
+        btnDownload.addEventListener('click', async () => {
+            try {
+                const type = categorySelect.value;
+                await api.downloadReport(token, type, startInput.value, endInput.value);
+            } catch (error) {
+                alert("Download failed.");
+            }
+        });
+
+        // Initial Load
+        refreshPreview();
+    }
 
 });

@@ -576,3 +576,14 @@ export async function downloadReport(token, type, start = '', end = '') {
     a.click();
     a.remove();
 }
+
+// (REPORTS) Get Preview Data
+export async function getReportPreview(token, type, start = '', end = '') {
+    const url = `/api/reports/preview?type=${type}&startDate=${start}&endDate=${end}`;
+    const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const result = await response.json();
+    if(!result.success) throw new Error(result.data);
+    return result.data;
+}
