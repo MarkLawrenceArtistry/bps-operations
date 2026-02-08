@@ -93,6 +93,10 @@
                         <img src="Icons/Manage User Acc Page/search_icon.png" alt="Search">
                         <input type="text" placeholder="Search">
                     </div>
+                    <button id="system-maintenance-btn" class="add-account-btn" style="background-color: #2e3b97; color: white; margin-right: 10px;">
+                        <img src="Icons/Sidebar-Navigation Bar (All Pages)/dashboard-icon.png" style="filter: brightness(0) invert(1);" alt="">
+                        System Backup
+                    </button>
                     <button id="bulk-delete-btn" class="delete-btn" style="display:none; margin-right: 10px; padding: 0.7rem 1.5rem; border-radius: 25px;">
                         Delete Selected (<span id="selected-count">0</span>)
                     </button>
@@ -175,6 +179,43 @@
                         </form>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="system-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>System Maintenance</h2>
+                <span class="close-modal" id="close-system-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                
+                <!-- Backup Section -->
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+                    <h3 style="margin-bottom: 0.5rem; color: #111827;">Backup Data</h3>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                        Download a ZIP file containing the database and all uploaded images.
+                    </p>
+                    <button id="btn-download-backup" class="btn-orange" style="width: 100%;">
+                        Download Backup
+                    </button>
+                </div>
+
+                <!-- Restore Section -->
+                <div style="background: #fff7ed; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffedd5;">
+                    <h3 style="margin-bottom: 0.5rem; color: #9a3412;">Restore Data</h3>
+                    <p style="color: #9a3412; font-size: 0.9rem; margin-bottom: 1rem;">
+                        <strong>Warning:</strong> This will overwrite current data. The system may require a refresh.
+                    </p>
+                    <form id="restore-form">
+                        <input type="file" id="backup-file" accept=".zip" required style="width: 100%; margin-bottom: 1rem;">
+                        <button type="submit" class="btn-orange" style="width: 100%; background-color: #ef4444;">
+                            Upload & Restore
+                        </button>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>

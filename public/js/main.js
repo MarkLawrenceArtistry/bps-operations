@@ -1335,4 +1335,124 @@ document.addEventListener('DOMContentLoaded', async () => {
         refreshPreview();
     }
 
+
+    // --- SYSTEM BACKUP & RESTORE LOGIC ---
+    // --- SYSTEM BACKUP & RESTORE LOGIC ---
+    const systemBtn = document.getElementById('system-maintenance-btn');
+    const systemModal = document.getElementById('system-modal');
+    const closeSystemModal = document.getElementById('close-system-modal');
+
+    if (systemBtn && systemModal) {
+        // Open Modal
+        systemBtn.addEventListener('click', () => {
+            systemModal.style.display = 'flex';
+        });
+
+        // Close Modal
+        closeSystemModal.addEventListener('click', () => {
+            systemModal.style.display = 'none';
+        });
+
+        // Close on click outside
+        window.addEventListener('click', (e) => {
+            if (e.target === systemModal) systemModal.style.display = 'none';
+        });
+
+        // Helper to find token
+        function getStoredToken() {
+            const t1 = localStorage.getItem('token');
+            const t2 = localStorage.getItem('admin_token');
+            const t3 = localStorage.getItem('session');
+            
+            let found = t1 || t2 || t3;
+
+            // *** THE FIX: Remove extra quotes if they exist ***
+            if (found && found.startsWith('"') && found.endsWith('"')) {
+                found = found.slice(1, -1);
+            }
+            
+            return found;
+        }
+
+        // 1. Handle Backup Download
+        document.getElementById('btn-download-backup').addEventListener('click', async () => {
+            const token = getStoredToken(); // Now returns clean token
+
+            if (!token) {
+                alert("Error: You are not logged in.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/system/backup', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}` 
+                    }
+                });
+
+                if (res.status === 200) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `bps_backup_${new Date().toISOString().slice(0,10)}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json();
+                    console.error("Server Error:", err);
+                    alert(`Backup failed: ${err.data || "Unauthorized"}`);
+                }
+            } catch (err) {
+                console.error("Network Error:", err);
+                alert("Error downloading backup. Check console (F12).");
+            }
+        });
+
+        // 2. Handle Restore Upload
+        document.getElementById('restore-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = getStoredToken();
+            if (!token) return alert("Error: Token missing. Please re-login.");
+
+            if (!confirm("CRITICAL WARNING: This will delete all current data and replace it with the backup. Are you sure?")) return;
+
+            const fileInput = document.getElementById('backup-file');
+            if(fileInput.files.length === 0) return alert("Please select a file.");
+
+            const formData = new FormData();
+            formData.append('backup_file', fileInput.files[0]);
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Restoring...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/system/restore', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert("Restore Successful! The page will now reload.");
+                    location.reload();
+                } else {
+                    alert("Restore Failed: " + result.data);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Restore failed. Server connection error.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
 });
