@@ -40,15 +40,22 @@ const getAllSeller = async (req, res) => {
         const search = req.query.search || '';
         const offset = (page - 1) * limit;
 
-        let query = `SELECT id, name, category, contact_num, email, image_path, platform_name, created_at FROM seller`;
-        let countQuery = `SELECT COUNT(*) as count FROM seller`;
+        // REPLACE query block (approx lines 40-50)
+        let query = `SELECT id, name, category, contact_num, email, image_path, platform_name, created_at FROM seller WHERE 1=1`;
+        let countQuery = `SELECT COUNT(*) as count FROM seller WHERE 1=1`;
         let params = [];
 
         if(search) {
-            const searchSQL = ` WHERE name LIKE ? OR email LIKE ? OR platform_name LIKE ?`;
+            const searchSQL = ` AND (name LIKE ? OR email LIKE ? OR platform_name LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        if(req.query.category) {
+            query += ` AND category = ?`;
+            countQuery += ` AND category = ?`;
+            params.push(req.query.category);
         }
 
         query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;

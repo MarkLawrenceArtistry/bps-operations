@@ -77,25 +77,44 @@ const getAllInventory = async (req, res) => {
         const search = req.query.search || '';
         const offset = (page - 1) * limit;
 
+        // REPLACE the query construction block (approx lines 77-94)
+        // Base Query
         let query = `
             SELECT i.id, i.name, i.category_id, ic.name as category_name, i.quantity, i.min_stock_level, i.image_url 
             FROM inventory i
             LEFT JOIN inventory_categories ic ON i.category_id = ic.id
+            WHERE 1=1
         `;
         let countQuery = `
             SELECT COUNT(*) as count FROM inventory i
             LEFT JOIN inventory_categories ic ON i.category_id = ic.id
+            WHERE 1=1
         `;
         let params = [];
 
+        // Search
         if(search) {
-            const searchSQL = ` WHERE i.name LIKE ? OR ic.name LIKE ?`;
+            const searchSQL = ` AND (i.name LIKE ? OR ic.name LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`);
         }
 
-        query += ` ORDER BY i.created_at DESC LIMIT ? OFFSET ?`;
+        // Filter: Category
+        if(req.query.category) {
+            query += ` AND i.category_id = ?`;
+            countQuery += ` AND i.category_id = ?`;
+            params.push(req.query.category);
+        }
+
+        // Sort
+        const sort = req.query.sort;
+        if (sort === 'qty_asc') query += ` ORDER BY i.quantity ASC`;
+        else if (sort === 'qty_desc') query += ` ORDER BY i.quantity DESC`;
+        else if (sort === 'name_asc') query += ` ORDER BY i.name ASC`;
+        else query += ` ORDER BY i.created_at DESC`; // Default 'newest'
+
+        query += ` LIMIT ? OFFSET ?`;
         const queryParams = [...params, limit, offset];
         
         const inventory = await all(query, queryParams);

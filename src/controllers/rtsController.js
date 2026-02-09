@@ -14,21 +14,30 @@ const getAllRTS = async (req, res) => {
             SELECT rts.*, seller.name as seller_name 
             FROM rts 
             LEFT JOIN seller ON rts.seller_id = seller.id
+            WHERE 1=1
         `;
         let countQuery = `
             SELECT COUNT(*) as count FROM rts 
             LEFT JOIN seller ON rts.seller_id = seller.id
+            WHERE 1=1
         `;
         let params = [];
 
         if(search) {
-            const searchSQL = ` WHERE rts.tracking_no LIKE ? OR rts.customer_name LIKE ? OR rts.product_name LIKE ?`;
+            const searchSQL = ` AND (rts.tracking_no LIKE ? OR rts.customer_name LIKE ? OR rts.product_name LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`, `%${search}%`);
         }
 
-        query += ` ORDER BY rts.created_at DESC LIMIT ? OFFSET ?`;
+        if(req.query.status) {
+            query += ` AND rts.status = ?`;
+            countQuery += ` AND rts.status = ?`;
+            params.push(req.query.status);
+        }
+
+        const sort = req.query.sort === 'ASC' ? 'ASC' : 'DESC';
+        query += ` ORDER BY rts.created_at ${sort} LIMIT ? OFFSET ?`;
         const queryParams = [...params, limit, offset];
         
         const rows = await all(query, queryParams);

@@ -220,9 +220,9 @@ export async function deleteInventory(id, token) {
     return result.data;
 }
 
-// (INVENTORY) Get All Inventory (Paginated)
-export async function getAllInventory(token, page = 1, search = '') {
-    const response = await fetch(`/api/inventory?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllInventory(token, page = 1, search = '', category = '', sort = 'newest') {
+    const url = `/api/inventory?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${category}&sort=${sort}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization' : `Bearer ${token}` }
     });
@@ -261,8 +261,9 @@ export async function updateInventory(formData, id, token) {
 
 // (SELLER) Get All Sellers
 // Supports pagination OR fetching all for dropdowns
-export async function getAllSellers(token, page = 1, search = '') {
-    const response = await fetch(`/api/seller?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllSellers(token, page = 1, search = '', category = '') {
+    const url = `/api/seller?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     });
@@ -336,8 +337,9 @@ export async function deleteSeller(id, token) {
 // -----------------------------------------------------------
 
 // (RTS) Get All (Paginated)
-export async function getAllRTS(token, page = 1, search = '') {
-    const response = await fetch(`/api/rts?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllRTS(token, page = 1, search = '', status = '', sort = 'DESC') {
+    const url = `/api/rts?page=${page}&limit=10&search=${encodeURIComponent(search)}&status=${status}&sort=${sort}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     });

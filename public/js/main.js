@@ -6,7 +6,7 @@ let currentAccount = null;
 // Global State for Pagination
 const state = {
     accountPage: 1, accountSearch: '', accountRole: '',
-    inventoryPage: 1, inventorySearch: '',
+    inventoryPage: 1, inventorySearch: '', inventoryCategory: '', inventorySort: 'newest',
     sellerPage: 1, sellerSearch: '',
     rtsPage: 1, rtsSearch: '',
     inventoryCatPage: 1,
@@ -416,7 +416,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Note: inventory.html usually has a different class for pagination
         const paginationDiv = document.querySelector('.inventory-pagination') || document.querySelector('.pagination');
         
-        loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage');
+        const catFilter = document.getElementById('inv-category-filter');
+        const sortFilter = document.getElementById('inv-sort');
+
+        // A. POPULATE CATEGORY DROPDOWN
+        if(catFilter) {
+            try {
+                const token = JSON.parse(localStorage.getItem('token'));
+                const cats = await api.getAllInventoryCategories(token, 1, true); // fetchAll=true
+                cats.data.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = c.name;
+                    catFilter.appendChild(opt);
+                });
+            } catch(e) { console.error("Failed to load category filter", e); }
+            
+            // Listener
+            catFilter.addEventListener('change', (e) => {
+                state.inventoryCategory = e.target.value;
+                state.inventoryPage = 1;
+                loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage', 'inventorySearch', 'inventoryCategory', 'inventorySort');
+            });
+        }
+
+        // B. SORT LISTENER
+        if(sortFilter) {
+            sortFilter.addEventListener('change', (e) => {
+                state.inventorySort = e.target.value;
+                state.inventoryPage = 1;
+                loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage', 'inventorySearch', 'inventoryCategory', 'inventorySort');
+            });
+        }
+
+        // C. UPDATE INITIAL LOAD (Add the new keys)
+        loadPaginatedData(api.getAllInventory, render.renderInventoryTable, inventoryListDiv, paginationDiv, 'inventoryPage', 'inventorySearch', 'inventoryCategory', 'inventorySort');
 
         // Search Listener
         const searchInput = document.querySelector('.inventory-search-filter input'); // Uses the specific wrapper class
@@ -601,7 +635,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sellerListDiv = document.querySelector('#seller-list');
     if (sellerListDiv) {
         const paginationDiv = document.querySelector('.pagination');
-        loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage');
+        const sellerCatFilter = document.getElementById('seller-cat-filter');
+
+        // 1. UPDATE INITIAL LOAD
+        loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch', 'sellerCategory');
+
+        // 2. FILTER LISTENER
+        if(sellerCatFilter) {
+            sellerCatFilter.addEventListener('change', (e) => {
+                state.sellerCategory = e.target.value;
+                state.sellerPage = 1;
+                loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch', 'sellerCategory');
+            });
+        }
 
         const searchInput = document.querySelector('.search-box input');
         if(searchInput) {
@@ -737,7 +783,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rtsListDiv = document.querySelector('#rts-list');
     if (rtsListDiv) {
         const paginationDiv = document.querySelector('.pagination');
-        loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage');
+        const rtsStatusFilter = document.getElementById('rts-status-filter');
+        const rtsSort = document.getElementById('rts-sort');
+
+        // 1. UPDATE INITIAL LOAD
+        loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage', 'rtsSearch', 'rtsStatus', 'rtsSort');
+
+        // 2. LISTENERS
+        if(rtsStatusFilter) {
+            rtsStatusFilter.addEventListener('change', (e) => {
+                state.rtsStatus = e.target.value;
+                state.rtsPage = 1;
+                loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage', 'rtsSearch', 'rtsStatus', 'rtsSort');
+            });
+        }
+        if(rtsSort) {
+            rtsSort.addEventListener('change', (e) => {
+                state.rtsSort = e.target.value;
+                state.rtsPage = 1;
+                loadPaginatedData(api.getAllRTS, render.renderRTSTable, rtsListDiv, paginationDiv, 'rtsPage', 'rtsSearch', 'rtsStatus', 'rtsSort');
+            });
+        }
 
         const searchInput = document.querySelector('.search-box input');
         if(searchInput) {

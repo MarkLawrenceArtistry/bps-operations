@@ -96,6 +96,17 @@
                 <!-- Inventory Section -->
                 <div class="inventory-wrapper">
                     <div class="inventory-actions">
+                        <select id="inv-category-filter" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 5px; max-width: 150px;">
+                            <option value="">All Categories</option>
+                            <!-- Options will be loaded via JS -->
+                        </select>
+
+                        <select id="inv-sort" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 10px;">
+                            <option value="newest">Newest First</option>
+                            <option value="qty_asc">Lowest Stock</option>
+                            <option value="qty_desc">Highest Stock</option>
+                            <option value="name_asc">Name (A-Z)</option>
+                        </select>
                         <div class="inventory-search-filter">
                             <div class="search-box">
                                 <input type="text" placeholder="Search" title="Search Inventory">

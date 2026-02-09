@@ -87,6 +87,15 @@
 
             <div class="main">
                 <div class="account-actions">
+                    <select id="rts-status-filter" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 5px;">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="returned_to_seller">Returned</option>
+                    </select>
+                    <select id="rts-sort" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 10px;">
+                        <option value="DESC">Newest First</option>
+                        <option value="ASC">Oldest First</option>
+                    </select>
                     <div class="search-box">
                         <img src="Icons/Manage User Acc Page/search_icon.png" alt="Search">
                         <input type="text" placeholder="Search Tracking No...">
