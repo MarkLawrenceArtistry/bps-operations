@@ -26,9 +26,8 @@ export async function createAccount(data, token) {
 }
 
 // (AUTH) Get All Accounts (Paginated)
-export async function getAllAccounts(token, page = 1, search = '') {
-    // Append search param
-    const response = await fetch(`/api/auth?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllAccounts(token, page = 1, search = '', role = '') {
+    const response = await fetch(`/api/auth?page=${page}&limit=10&search=${encodeURIComponent(search)}&role=${role}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization' : `Bearer ${token}` }
     });
@@ -547,8 +546,9 @@ export async function deleteDocument(id, token) {
 }
 
 // (AUDIT) Get All Logs (Paginated)
-export async function getAuditLogs(token, page = 1, search = '') {
-    const response = await fetch(`/api/audit?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAuditLogs(token, page = 1, search = '', action = '', sort = 'DESC') {
+    const url = `/api/audit?page=${page}&limit=10&search=${encodeURIComponent(search)}&action=${action}&sort=${sort}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
     });

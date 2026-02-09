@@ -61,16 +61,23 @@ const getAllUsers = async (req, res) => {
         const offset = (page - 1) * limit;
 
         // Base Query
-        let query = `SELECT id, username, email, role_id, is_active FROM users`;
-        let countQuery = `SELECT COUNT(*) as count FROM users`;
+        let query = `SELECT id, username, email, role_id, is_active FROM users WHERE 1=1`;
+        let countQuery = `SELECT COUNT(*) as count FROM users WHERE 1=1`;
         let params = [];
 
         // Add Search Condition
         if (search) {
-            const searchSQL = ` WHERE username LIKE ? OR email LIKE ?`;
+            const searchSQL = ` AND (username LIKE ? OR email LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`);
+        }
+
+        // Add Role Filter
+        if (req.query.role) {
+            query += ` AND role_id = ?`;
+            countQuery += ` AND role_id = ?`;
+            params.push(req.query.role);
         }
 
         query += ` LIMIT ? OFFSET ?`;

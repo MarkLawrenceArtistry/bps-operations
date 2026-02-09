@@ -88,6 +88,18 @@
 
             <div class="main">
                 <div class="account-actions">
+                    <select id="audit-action-filter" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 5px;">
+                        <option value="">All Actions</option>
+                        <option value="LOGIN">Login</option>
+                        <option value="CREATE">Create</option>
+                        <option value="UPDATE">Update</option>
+                        <option value="DELETE">Delete</option>
+                    </select>
+
+                    <select id="audit-sort" style="padding: 0.5rem; border-radius: 10px; border: 1px solid #e5e7eb; margin-right: 10px;">
+                        <option value="DESC">Newest First</option>
+                        <option value="ASC">Oldest First</option>
+                    </select>
                     <div class="search-box">
                         <img src="Icons/Manage User Acc Page/search_icon.png" alt="Search">
                         <input type="text" id="audit-search" placeholder="Search logs...">

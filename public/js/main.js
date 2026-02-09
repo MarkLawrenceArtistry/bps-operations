@@ -5,36 +5,38 @@ let currentAccount = null;
 
 // Global State for Pagination
 const state = {
-    accountPage: 1, accountSearch: '',
+    accountPage: 1, accountSearch: '', accountRole: '',
     inventoryPage: 1, inventorySearch: '',
     sellerPage: 1, sellerSearch: '',
     rtsPage: 1, rtsSearch: '',
     inventoryCatPage: 1,
-    auditPage: 1, auditSearch: '',
+    auditPage: 1, auditSearch: '', auditAction: '', auditSort: 'DESC',
     salesPage: 1, salesSearch: '',
     documentPage: 1, documentSearch: ''
 };
 
 // --- HELPER: Load Paginated Data ---
-async function loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey, searchStateKey = null) {
+async function loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey, searchStateKey = null, ...filterKeys) {
     if (!listDiv) return;
 
     try {
         const token = JSON.parse(localStorage.getItem('token'));
         const currentPage = state[pageStateKey];
-        // Pass search term if key exists
         const searchTerm = searchStateKey ? state[searchStateKey] : ''; 
 
-        // Call API with search
-        const result = await apiMethod(token, currentPage, searchTerm);
+        // Collect extra filter values from state
+        const extraArgs = filterKeys.map(key => state[key]);
 
-        // Render
+        // Call API with token, page, search, ...filters
+        const result = await apiMethod(token, currentPage, searchTerm, ...extraArgs);
+
         renderMethod(result.data, listDiv);
 
         if (paginationDiv && result.pagination) {
             render.renderPagination(result.pagination, paginationDiv, (newPage) => {
                 state[pageStateKey] = newPage;
-                loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey, searchStateKey);
+                // Pass the same arguments recursively
+                loadPaginatedData(apiMethod, renderMethod, listDiv, paginationDiv, pageStateKey, searchStateKey, ...filterKeys);
             });
         }
     } catch (err) {
@@ -284,18 +286,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const accountListDiv = document.querySelector('#account-list');
     if (accountListDiv) {
         const paginationDiv = document.querySelector('.pagination');
-        
-        // Load Data
-        loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage');
+        const roleFilter = document.getElementById('account-role-filter'); // <--- GET ELEMENT
 
-        // Search Listener
+        // 1. UPDATE INITIAL LOAD to include 'accountRole'
+        loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch', 'accountRole');
+
+        // 2. UPDATE SEARCH LISTENER to include 'accountRole'
         const searchInput = document.querySelector('.search-box input');
         if(searchInput) {
             searchInput.addEventListener('input', debounce((e) => {
                 state.accountSearch = e.target.value.trim();
-                state.accountPage = 1; // Reset to page 1 on search
-                loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch');
+                state.accountPage = 1;
+                loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch', 'accountRole');
             }, 500));
+        }
+
+        // 3. ADD FILTER LISTENER
+        if(roleFilter) {
+            roleFilter.addEventListener('change', (e) => {
+                state.accountRole = e.target.value;
+                state.accountPage = 1;
+                loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch', 'accountRole');
+            });
         }
 
         // Event Delegation
@@ -874,15 +886,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     const auditListDiv = document.querySelector('#audit-list');
     if (auditListDiv) {
         const paginationDiv = document.querySelector('.pagination');
-        loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage');
+        const actionFilter = document.getElementById('audit-action-filter'); // <--- GET
+        const sortFilter = document.getElementById('audit-sort');         // <--- GET
 
-        const searchInput = document.querySelector('#audit-search'); // ID specific to audit page HTML
+        // 1. UPDATE INITIAL LOAD
+        loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage', 'auditSearch', 'auditAction', 'auditSort');
+
+        // 2. UPDATE SEARCH LISTENER
+        const searchInput = document.querySelector('#audit-search');
         if(searchInput) {
             searchInput.addEventListener('input', debounce((e) => {
                 state.auditSearch = e.target.value.trim();
                 state.auditPage = 1;
-                loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage', 'auditSearch');
+                loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage', 'auditSearch', 'auditAction', 'auditSort');
             }, 500));
+        }
+
+        // 3. ADD NEW LISTENERS
+        if(actionFilter) {
+            actionFilter.addEventListener('change', (e) => {
+                state.auditAction = e.target.value;
+                state.auditPage = 1;
+                loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage', 'auditSearch', 'auditAction', 'auditSort');
+            });
+        }
+        if(sortFilter) {
+            sortFilter.addEventListener('change', (e) => {
+                state.auditSort = e.target.value;
+                state.auditPage = 1;
+                loadPaginatedData(api.getAuditLogs, render.renderAuditLogTable, auditListDiv, paginationDiv, 'auditPage', 'auditSearch', 'auditAction', 'auditSort');
+            });
         }
     }
 
