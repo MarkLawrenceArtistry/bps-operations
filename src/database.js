@@ -238,25 +238,27 @@ const initDB = () => {
 
 
         // Add initial admin account
-        // Pang CREATE din ng account to
         async function seedAdmin() {
             const password = "Admin123!";
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(password, salt);
 
-            db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'Admin')`);
-            db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'Staff')`);
+            // Wrap in serialize to ensure roles exist before creating user
+            db.serialize(() => {
+                db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'Admin')`);
+                db.run(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'Staff')`);
 
-            db.run(`
-                INSERT OR IGNORE INTO users (username, email, password_hash, role_id, is_active)
-                VALUES ('admin', 'admin@bps.com', ?, 1, 1)
-            `, [hash], (err) => {
-                if(err) {
-                    console.error(err.message);
-                } else {
-                    console.log("Admin account created! Email admin@bps.com, Password: " + password);
-                }
-            })
+                db.run(`
+                    INSERT OR IGNORE INTO users (username, email, password_hash, role_id, is_active)
+                    VALUES ('admin', 'admin@bps.com', ?, 1, 1)
+                `, [hash], (err) => {
+                    if(err) {
+                        console.error("Seeding Error:", err.message);
+                    } else {
+                        console.log("Admin account check/creation complete.");
+                    }
+                });
+            });
         }
         seedAdmin();
     })
