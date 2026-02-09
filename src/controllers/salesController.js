@@ -8,19 +8,25 @@ const getAllSales = async (req, res) => {
         const search = req.query.search || '';
         const offset = (page - 1) * limit;
 
-        let query = `SELECT * FROM weekly_sales`;
-        let countQuery = `SELECT COUNT(*) as count FROM weekly_sales`;
+        let query = `SELECT * FROM weekly_sales WHERE 1=1`;
+        let countQuery = `SELECT COUNT(*) as count FROM weekly_sales WHERE 1=1`;
         let params = [];
 
         if(search) {
-            // Search by amount (as text) or notes
-            const searchSQL = ` WHERE notes LIKE ? OR CAST(total_amount AS TEXT) LIKE ?`;
+            const searchSQL = ` AND (notes LIKE ? OR CAST(total_amount AS TEXT) LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`);
         }
 
-        query += ` ORDER BY week_start_date DESC LIMIT ? OFFSET ?`;
+        // Sort Logic
+        const sort = req.query.sort;
+        if (sort === 'oldest') query += ` ORDER BY week_start_date ASC`;
+        else if (sort === 'amount_high') query += ` ORDER BY total_amount DESC`;
+        else if (sort === 'amount_low') query += ` ORDER BY total_amount ASC`;
+        else query += ` ORDER BY week_start_date DESC`; // Default 'newest'
+
+        query += ` LIMIT ? OFFSET ?`;
         const queryParams = [...params, limit, offset];
 
         const rows = await all(query, queryParams);

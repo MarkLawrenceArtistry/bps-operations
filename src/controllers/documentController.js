@@ -8,15 +8,21 @@ const getAllDocuments = async (req, res) => {
         const search = req.query.search || '';
         const offset = (page - 1) * limit;
 
-        let query = `SELECT * FROM documents`;
-        let countQuery = `SELECT COUNT(*) as count FROM documents`;
+        let query = `SELECT * FROM documents WHERE 1=1`;
+        let countQuery = `SELECT COUNT(*) as count FROM documents WHERE 1=1`;
         let params = [];
 
         if(search) {
-            const searchSQL = ` WHERE title LIKE ? OR category LIKE ?`;
+            const searchSQL = ` AND (title LIKE ? OR category LIKE ?)`;
             query += searchSQL;
             countQuery += searchSQL;
             params.push(`%${search}%`, `%${search}%`);
+        }
+
+        if(req.query.category) {
+            query += ` AND category = ?`;
+            countQuery += ` AND category = ?`;
+            params.push(req.query.category);
         }
 
         query += ` ORDER BY expiry_date ASC LIMIT ? OFFSET ?`;

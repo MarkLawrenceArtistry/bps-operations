@@ -7,12 +7,12 @@ let currentAccount = null;
 const state = {
     accountPage: 1, accountSearch: '', accountRole: '',
     inventoryPage: 1, inventorySearch: '', inventoryCategory: '', inventorySort: 'newest',
-    sellerPage: 1, sellerSearch: '',
-    rtsPage: 1, rtsSearch: '',
+    sellerPage: 1, sellerSearch: '', sellerCategory: '',
+    rtsPage: 1, rtsSearch: '', rtsStatus: '', rtsSort: 'DESC',
     inventoryCatPage: 1,
     auditPage: 1, auditSearch: '', auditAction: '', auditSort: 'DESC',
-    salesPage: 1, salesSearch: '',
-    documentPage: 1, documentSearch: ''
+    salesPage: 1, salesSearch: '', salesSort: 'newest',
+    documentPage: 1, documentSearch: '', documentCategory: ''
 };
 
 // --- HELPER: Load Paginated Data ---
@@ -992,11 +992,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (salesListDiv) {
         const paginationDiv = document.querySelector('.pagination') || document.createElement('div');
         if(!document.querySelector('.pagination')) {
-             salesListDiv.parentNode.appendChild(paginationDiv);
-             paginationDiv.className = 'pagination';
+            salesListDiv.parentNode.appendChild(paginationDiv);
+            paginationDiv.className = 'pagination';
         }
         
-        loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage');
+        const salesSort = document.getElementById('sales-sort');
+
+        // 1. UPDATE INITIAL LOAD
+        loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage', 'salesSearch', 'salesSort');
+
+        // 2. SORT LISTENER
+        if(salesSort) {
+            salesSort.addEventListener('change', (e) => {
+                state.salesSort = e.target.value;
+                state.salesPage = 1;
+                loadPaginatedData(api.getAllSales, render.renderSalesTable, salesListDiv, paginationDiv, 'salesPage', 'salesSearch', 'salesSort');
+            });
+        }
 
         const searchInput = document.querySelector('.search-box input');
         if(searchInput) {
@@ -1119,7 +1131,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             documentListDiv.parentNode.appendChild(paginationDiv);
         }
 
-        loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage');
+        const docCatFilter = document.getElementById('doc-category-filter');
+
+        // 1. UPDATE INITIAL LOAD
+        loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch', 'documentCategory');
+
+        // 2. FILTER LISTENER
+        if(docCatFilter) {
+            docCatFilter.addEventListener('change', (e) => {
+                state.documentCategory = e.target.value;
+                state.documentPage = 1;
+                loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch', 'documentCategory');
+            });
+        }
 
         const searchInput = document.querySelector('.search-box input');
         if(searchInput) {

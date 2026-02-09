@@ -439,8 +439,9 @@ export async function getLowStockItems(token) {
 // -----------------------------------------------------------
 
 // (SALES) Get All (Paginated)
-export async function getAllSales(token, page = 1, search = '') {
-    const response = await fetch(`/api/sales?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllSales(token, page = 1, search = '', sort = 'newest') {
+    const url = `/api/sales?page=${page}&limit=10&search=${encodeURIComponent(search)}&sort=${sort}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     });
@@ -496,8 +497,9 @@ export async function deleteSale(id, token) {
 // -----------------------------------------------------------
 
 // (DOCUMENTS) Get All (Paginated)
-export async function getAllDocuments(token, page = 1, search = '') {
-    const response = await fetch(`/api/documents?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+export async function getAllDocuments(token, page = 1, search = '', category = '') {
+    const url = `/api/documents?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     });
