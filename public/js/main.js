@@ -1174,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const elChartTotal = document.querySelector('.chart-total');
             const elChartTotalLarge = document.querySelector('.chart-total-large');
 
-            if(elLowStock) elLowStock.innerText = stats.lowStockCount + "+";
+            if(elLowStock) elLowStock.innerText = stats.lowStockCount;
             
             // Format Currency
             const peso = new Intl.NumberFormat('en-PH', { 
@@ -1186,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if(elSales) elSales.innerText = peso.format(stats.salesMonthTotal);
-            if(elSellers) elSellers.innerText = stats.sellerCount + "+";
+            if(elSellers) elSellers.innerText = stats.sellerCount;
             
             const fullPeso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
             if(elChartTotal) elChartTotal.innerText = fullPeso.format(stats.chart.grandTotal);
