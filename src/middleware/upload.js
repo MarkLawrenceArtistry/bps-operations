@@ -1,17 +1,24 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Check if running on Railway with a Volume
-        let uploadPath = 'public/uploads/';
-        
+        let uploadPath;
+
+        // CHECK: Are we on Railway with a Volume?
         if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+            // Use the Volume path (e.g., /data/uploads)
             uploadPath = path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'uploads');
+        } else {
+            // Local Development: Use absolute path to project/public/uploads
+            // __dirname is 'src/middleware', so we go up two levels
+            uploadPath = path.join(__dirname, '../../public/uploads');
         }
 
-        // Create folder if it doesn't exist
+        // Create the directory if it doesn't exist
         if (!fs.existsSync(uploadPath)){
+            console.log(`Creating upload directory at: ${uploadPath}`);
             fs.mkdirSync(uploadPath, { recursive: true });
         }
 
@@ -23,15 +30,23 @@ const storage = multer.diskStorage({
     }
 });
 
-
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 100 * 1024 * 1024 }, // CHANGE THIS: Increased to 100MB
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
     fileFilter: (req, file, cb) => {
-        // We need to allow ZIP files now, not just images!
-        checkFileType(file, cb);
+        const filetypes = /jpeg|jpg|png|gif|zip|x-zip-compressed|pdf/; // Added PDF here explicitly
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+
+        if (path.extname(file.originalname).toLowerCase() === '.zip' || mimetype || extname) {
+            return cb(null, true);
+        } else {
+            cb('Error: Images, PDFs or Zips Only!');
+        }
     }
 });
+
+module.exports = upload;
 
 function checkFileType(file, cb) {
     // ALLOW ZIP FILES
