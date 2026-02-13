@@ -92,10 +92,12 @@ const deleteDocument = async (req, res) => {
         const doc = await get(`SELECT file_path FROM documents WHERE id = ?`, [id]);
 
         if (doc && doc.file_path) {
+            // FIX: Ensure URL parsing doesn't crash if malformed
             const filename = doc.file_path.split('/').pop();
             const uploadDir = process.env.RAILWAY_VOLUME_MOUNT_PATH 
                 ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'uploads')
                 : path.join(__dirname, '../../public/uploads');
+            
             const filePath = path.join(uploadDir, filename);
 
             if (fs.existsSync(filePath)) {
@@ -110,6 +112,7 @@ const deleteDocument = async (req, res) => {
         getIO().emit('document_update');
         res.status(200).json({ success: true, data: "Deleted." });
     } catch (err) {
+        console.error("Delete Doc Error:", err);
         res.status(500).json({ success: false, data: `Error: ${err.message}` });
     }
 };

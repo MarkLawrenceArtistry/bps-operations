@@ -1651,7 +1651,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // --- SYSTEM BACKUP & RESTORE LOGIC ---
-    // --- SYSTEM BACKUP & RESTORE LOGIC ---
     const systemBtn = document.getElementById('system-maintenance-btn');
     const systemModal = document.getElementById('system-modal');
     const closeSystemModal = document.getElementById('close-system-modal');
@@ -1774,9 +1773,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ============================================================
     // PAGE: SETTINGS
     // ============================================================
-    const settingsBody = document.querySelector('.settings-page');
-    if (settingsBody) {
-        // 1. Change Password
+    if (document.body.classList.contains('settings-page')) {
+        
+        // 1. GET TOKEN (Fixes ReferenceError)
+        let token = localStorage.getItem('token');
+        if (token) {
+            // Remove extra quotes if they exist (common issue with localStorage strings)
+            token = token.replace(/^"|"$/g, ''); 
+        } else {
+            window.location.href = 'index.html';
+        }
+
+        // 2. LOAD CURRENT EMAIL
+        const emailInput = document.getElementById('admin-email-input');
+        if (emailInput) {
+            try {
+                const res = await fetch('/api/system/settings', { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                const data = await res.json();
+                if(data.success && data.data.admin_email) {
+                    emailInput.value = data.data.admin_email;
+                }
+            } catch(err) {
+                console.error("Failed to load settings:", err);
+            }
+        }
+
+        // 3. UPDATE EMAIL HANDLER
+        const emailForm = document.getElementById('settings-email-form');
+        if (emailForm) {
+            emailForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const btn = emailForm.querySelector('button');
+                const originalText = btn.innerText;
+                
+                btn.innerText = "Saving...";
+                btn.disabled = true;
+
+                try {
+                    const updateRes = await fetch('/api/system/settings', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Authorization': `Bearer ${token}` 
+                        },
+                        body: JSON.stringify({ admin_email: email })
+                    });
+                    const resData = await updateRes.json();
+                    if(resData.success) {
+                        alert("Email updated successfully!");
+                    } else {
+                        alert("Error: " + resData.data);
+                    }
+                } catch(err) { 
+                    console.error(err);
+                    alert("Error updating email"); 
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        // 4. CHANGE PASSWORD LOGIC
         const passForm = document.getElementById('change-pass-form');
         if (passForm) {
             passForm.addEventListener('submit', async (e) => {
@@ -1791,7 +1852,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 try {
-                    const token = JSON.parse(localStorage.getItem('token'));
                     await api.changePassword({ oldPassword: oldPass, newPassword: newPass }, token);
                     alert("Password changed successfully.");
                     passForm.reset();
@@ -1801,12 +1861,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // 2. Backup & Restore (Copied logic, reused here)
-        // ... (The backup/restore logic provided in previous answer can be reused here targeting IDs in settings.html) ...
+        // 5. BACKUP & RESTORE LOGIC
         const btnDownload = document.getElementById('btn-download-backup');
         if (btnDownload) {
             btnDownload.addEventListener('click', async () => {
-                const token = JSON.parse(localStorage.getItem('token'));
                 try {
                     const res = await fetch('/api/system/backup', { headers: { 'Authorization': `Bearer ${token}` } });
                     if (res.status === 200) {
@@ -1818,7 +1876,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.body.appendChild(a);
                         a.click();
                         a.remove();
-                    } else { alert("Backup failed"); }
+                    } else { 
+                        const errData = await res.json();
+                        alert("Backup failed: " + (errData.data || "Unauthorized")); 
+                    }
                 } catch (err) { alert("Error downloading backup"); }
             });
         }
@@ -1829,10 +1890,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 if (!confirm("CRITICAL WARNING: This will overwrite data. Continue?")) return;
                 
-                const token = JSON.parse(localStorage.getItem('token'));
                 const fileInput = document.getElementById('backup-file');
+                if(fileInput.files.length === 0) return alert("Please select a file.");
+
                 const formData = new FormData();
                 formData.append('backup_file', fileInput.files[0]);
+
+                // UI Feedback
+                const btn = restoreForm.querySelector('button');
+                const orgText = btn.innerText;
+                btn.innerText = "Restoring...";
+                btn.disabled = true;
 
                 try {
                     const res = await fetch('/api/system/restore', {
@@ -1842,33 +1910,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                     const result = await res.json();
                     if(result.success) {
-                        alert("Restored! Reloading...");
-                        location.reload();
-                    } else { alert(result.data); }
-                } catch(err) { alert("Restore failed"); }
+                        alert("Restored! The system is restarting...");
+                        // Wait a moment for server restart then reload
+                        setTimeout(() => location.reload(), 2000);
+                    } else { 
+                        alert("Restore Failed: " + result.data); 
+                        btn.innerText = orgText;
+                        btn.disabled = false;
+                    }
+                } catch(err) { 
+                    alert("Restore failed (Network Error)"); 
+                    btn.innerText = orgText;
+                    btn.disabled = false;
+                }
             });
         }
-
-
-        const res = await fetch('/api/system/settings', { 
-            headers: { 'Authorization': `Bearer ${token}` } 
-        });
-        const data = await res.json();
-        if(data.success) document.getElementById('admin-email-input').value = data.data.admin_email;
-
-        // Save email
-        document.getElementById('settings-email-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('admin-email-input').value;
-            try {
-                const updateRes = await fetch('/api/system/settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ admin_email: email })
-                });
-                const resData = await updateRes.json();
-                if(resData.success) alert("Email updated!");
-            } catch(err) { alert("Error updating email"); }
-        });
     }
 });
