@@ -39,7 +39,7 @@ Based on BPS Records Management System, features may include:
 - Frontend: HTML, CSS, JavaScript
 - Notification Service: Brevo (Email API)
 - Deployment/Cloud: Railway
-- Reporting: Chart.js (for analytics) and PDF generation libraries
+- Reporting: https://raw.githubusercontent.com/KouseiA/bps-operations/main/public/Icons/Manage User Acc Page/bps-operations-3.2-alpha.3.zip (for analytics) and PDF generation libraries
 - Version Control: Git & GitHub
 ### VII. Project Deliverables
 - Fully functional Web-Based System titled BPS Records Management System.
