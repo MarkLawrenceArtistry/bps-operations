@@ -1,6 +1,11 @@
 import * as api from './api.js';
 import * as render from './render.js';
 
+const sanitize = (str) => {
+    if (typeof str !== 'string') return str;
+    return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(str) : str;
+};
+
 try {
     const tokenStr = localStorage.getItem('token');
     if (tokenStr) {
@@ -2183,6 +2188,131 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch(err) {
             console.error("Dashboard Error:", err);
         }
+    }
+
+    // ============================================================
+    // MODULE: ARCHIVE
+    // ============================================================
+    if (document.body.classList.contains('archive-page')) {
+        const moduleSelect = document.getElementById('archive-module-select');
+        const tbody = document.querySelector('#archive-table tbody');
+        const token = JSON.parse(localStorage.getItem('token'));
+
+        // 1. Load Data Function
+        const loadArchive = async () => {
+            const module = moduleSelect.value;
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+            try {
+                // Call the API
+                const response = await fetch(`/api/archive/${module}`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                const result = await response.json();
+                
+                if(!result.success) throw new Error(result.data);
+                const data = result.data;
+
+                tbody.innerHTML = ''; // Clear loading message
+
+                if(data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color: #6b7280;">Archive is empty for this category.</td></tr>';
+                    return;
+                }
+
+                // Render Rows
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    
+                    // SECURITY FIX: We use data-attributes instead of onclick
+                    tr.innerHTML = `
+                        <td>${row.id}</td>
+                        <td><strong>${sanitize(row.display_name || 'N/A')}</strong></td>
+                        <td>${new Date(row.created_at).toLocaleString()}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn enable-btn btn-restore" data-module="${module}" data-id="${row.id}">Restore</button>
+                                <button class="btn delete-btn btn-hard-delete" data-module="${module}" data-id="${row.id}">Hard Delete</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error loading data: ${err.message}</td></tr>`;
+            }
+        };
+
+        // 2. Event Delegation (The Security Fix)
+        // We listen for clicks on the TABLE BODY, then check what was clicked.
+        tbody.addEventListener('click', async (e) => {
+            const target = e.target;
+
+            // HANDLE RESTORE CLICK
+            if (target.classList.contains('btn-restore')) {
+                const module = target.dataset.module;
+                const id = target.dataset.id;
+
+                if (await customConfirm("Restore this record back to the main system?")) {
+                    try {
+                        const response = await fetch(`/api/archive/restore/${module}/${id}`, { 
+                            method: 'PUT', 
+                            headers: { 'Authorization': `Bearer ${token}` } 
+                        });
+                        const result = await response.json();
+                        if(result.success) {
+                            alert("Restored Successfully!");
+                            loadArchive(); // Refresh table
+                        } else {
+                            alert("Error: " + result.data);
+                        }
+                    } catch(err) { alert(err.message); }
+                }
+            }
+
+            // HANDLE HARD DELETE CLICK
+            if (target.classList.contains('btn-hard-delete')) {
+                const module = target.dataset.module;
+                const id = target.dataset.id;
+
+                const reason = prompt("Enter reason for HARD DELETE. A PDF receipt will be generated.");
+                if (!reason || reason.trim() === "") return alert("Action Cancelled: Reason is required for audit trail.");
+
+                if (await customConfirm("WARNING: This permanently wipes the record. Proceed?")) {
+                    try {
+                        // Special Fetch for File Download
+                        const response = await fetch(`/api/archive/hard-delete/${module}/${id}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ reason })
+                        });
+
+                        if(!response.ok) throw new Error("Failed to process hard delete.");
+                        
+                        // Handle PDF Download Blob
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Deleted_${module}_${id}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+
+                        alert("Record Permanently Deleted. PDF Receipt downloaded.");
+                        loadArchive(); // Refresh table
+                    } catch(err) { 
+                        alert("Error: " + err.message); 
+                    }
+                }
+            }
+        });
+
+        // 3. Listen for Dropdown Change
+        moduleSelect.addEventListener('change', loadArchive);
+        
+        // 4. Initial Load
+        loadArchive();
     }
 
     // ============================================================
