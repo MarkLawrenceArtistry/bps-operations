@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="archive-page">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" title="Toggle Navigation">
     <div class="content">
         <div class="sidebar">
             <div class="sidebar-header">
@@ -76,7 +77,18 @@
         </div>
         <div class="main-content">
             <div class="main-header">
-                <h1>System Archive</h1>
+                <div class="header-left">
+                    <label for="nav-toggle" class="hamburger">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </label>
+                    <h1>System Archive</h1>
+                </div>
+                <div class="user-info">
+                    <h4>Admin</h4>
+                    <p>Archive Access</p>
+                </div>
             </div>
             <div class="main" style="padding: 2rem;">
                 <div class="account-actions">
