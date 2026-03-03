@@ -900,7 +900,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const accountListDiv = document.querySelector('#account-list');
     if (accountListDiv) {
         const paginationDiv = document.querySelector('.pagination');
-        const roleFilter = document.getElementById('account-role-filter'); // <--- GET ELEMENT
+        const roleFilter = document.getElementById('account-role-filter');
+        const accountSortFilter = document.getElementById('account-sort'); // Add this
+
+        // Add this new listener block:
+        if (accountSortFilter) {
+            accountSortFilter.addEventListener('change', (e) => {
+                state.accountSort = e.target.value;
+                state.accountPage = 1;
+                loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch', 'accountRole', 'accountSort');
+            });
+        }
 
         // 1. UPDATE INITIAL LOAD to include 'accountRole'
         loadPaginatedData(api.getAllAccounts, render.renderAccountsTable, accountListDiv, paginationDiv, 'accountPage', 'accountSearch', 'accountRole', 'accountSort');
@@ -1343,6 +1353,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sellerListDiv) {
         const paginationDiv = document.querySelector('.pagination');
         const sellerCatFilter = document.getElementById('seller-cat-filter');
+        const sellerSortFilter = document.getElementById('seller-sort'); // Add this
+
+        // Add this new listener block:
+        if (sellerSortFilter) {
+            sellerSortFilter.addEventListener('change', (e) => {
+                state.sellerSort = e.target.value;
+                state.sellerPage = 1;
+                loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch', 'sellerCategory', 'sellerSort');
+            });
+        }
 
         // 1. UPDATE INITIAL LOAD
         loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch', 'sellerCategory', 'sellerSort');
@@ -1361,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             searchInput.addEventListener('input', debounce((e) => {
                 state.sellerSearch = e.target.value.trim();
                 state.sellerPage = 1;
-                loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch');
+                loadPaginatedData(api.getAllSellers, render.renderSellersTable, sellerListDiv, paginationDiv, 'sellerPage', 'sellerSearch', 'sellerCategory', 'sellerSort');
             }, 500));
         }
 
@@ -1882,6 +1902,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const docCatFilter = document.getElementById('doc-category-filter');
+        const docSortFilter = document.getElementById('document-sort'); // Add this
+
+        // Add this new listener block:
+        if (docSortFilter) {
+            docSortFilter.addEventListener('change', (e) => {
+                state.documentSort = e.target.value;
+                state.documentPage = 1;
+                loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch', 'documentCategory', 'documentSort');
+            });
+        }
 
         // 1. UPDATE INITIAL LOAD
         loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch', 'documentCategory', 'documentSort');
@@ -1900,7 +1930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             searchInput.addEventListener('input', debounce((e) => {
                 state.documentSearch = e.target.value.trim();
                 state.documentPage = 1;
-                loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch');
+                loadPaginatedData(api.getAllDocuments, render.renderDocumentsTable, documentListDiv, paginationDiv, 'documentPage', 'documentSearch', 'documentCategory', 'documentSort');
             }, 500));
         }
             

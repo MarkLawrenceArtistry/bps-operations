@@ -62,8 +62,8 @@ export async function createAccount(data, token) {
 }
 
 // (AUTH) Get All Accounts (Paginated)
-export async function getAllAccounts(token, page = 1, search = '', role = '') {
-    const response = await request(`/api/auth?page=${page}&limit=10&search=${encodeURIComponent(search)}&role=${role}`, {
+export async function getAllAccounts(token, page = 1, search = '', role = '', sort = 'DESC') {
+    const response = await request(`/api/auth?page=${page}&limit=10&search=${encodeURIComponent(search)}&role=${role}&sort=${sort}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization' : `Bearer ${token}` }
     });
@@ -325,8 +325,8 @@ export async function updateInventory(formData, id, token) {
 // -----------------------------------------------------------
 
 // (SELLER) Get All Sellers
-export async function getAllSellers(token, page = 1, search = '', category = '') {
-    const url = `/api/seller?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+export async function getAllSellers(token, page = 1, search = '', category = '', sort = 'DESC') {
+    const url = `/api/seller?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&sort=${sort}`;
     const response = await request(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
@@ -563,8 +563,8 @@ export async function deleteSale(id, token) {
 // -----------------------------------------------------------
 
 // (DOCUMENTS) Get All (Paginated)
-export async function getAllDocuments(token, page = 1, search = '', category = '') {
-    const url = `/api/documents?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+export async function getAllDocuments(token, page = 1, search = '', category = '', sort = 'DESC') {
+    const url = `/api/documents?page=${page}&limit=10&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&sort=${sort}`;
     const response = await request(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
