@@ -74,15 +74,17 @@ io.on('connection', (socket) => {
     console.log('Client connected: ' + socket.id);
 });
 
+const { verifyToken } = require('./middleware/authMiddleware');
+
 // Middlewares
 app.use(express.json());
 if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
     console.log(`Serving uploads from Volume: ${process.env.RAILWAY_VOLUME_MOUNT_PATH}/uploads`);
-    app.use('/uploads', express.static(path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'uploads')));
+    app.use('/uploads', verifyToken, express.static(path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'uploads')));
 } else {
-    // Local development fallback
-    app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+    app.use('/uploads', verifyToken, express.static(path.join(__dirname, '../public/uploads')));
 }
+
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(cors());
 

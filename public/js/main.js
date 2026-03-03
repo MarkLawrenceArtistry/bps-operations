@@ -2561,5 +2561,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         }
+
+        // 6. LEGACY ENCRYPTION LOGIC
+        const btnEncrypt = document.getElementById('btn-encrypt-legacy');
+        if (btnEncrypt) {
+            btnEncrypt.addEventListener('click', async () => {
+                if (!confirm("This will encrypt all old files in the uploads folder. Make sure you have a backup first! Continue?")) return;
+                
+                const originalText = btnEncrypt.innerText;
+                btnEncrypt.innerText = "Encrypting files... please wait.";
+                btnEncrypt.disabled = true;
+
+                try {
+                    const res = await fetch('/api/system/encrypt-legacy', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        alert(result.data); // Shows how many were encrypted
+                    } else {
+                        alert("Error: " + result.data);
+                    }
+                } catch (err) {
+                    alert("Migration failed. Check server console.");
+                } finally {
+                    btnEncrypt.innerText = originalText;
+                    btnEncrypt.disabled = false;
+                }
+            });
+        }
     }
 });
